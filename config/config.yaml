@@ -1,3 +1,11 @@
 training_pipeline_config:
   pipeline_name: shipment
   artifact_dir: artifact
+
+data_ingestion_config:
+  author_username : divyeshardeshana
+  kaggel_dataset_name : supply-chain-shipment-pricing-data
+  raw_data_dir: raw_data
+  ingested_dir: ingested_data
+  ingested_train_dir: train
+  ingested_test_dir: test
