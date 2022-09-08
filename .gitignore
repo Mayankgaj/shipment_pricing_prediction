@@ -131,3 +131,4 @@ dmypy.json
 
 # Folders
 shipment/artifact/
+shipment_pricing_prediction.egg-info/
