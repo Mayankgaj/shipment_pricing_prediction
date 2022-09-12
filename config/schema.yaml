@@ -1,37 +1,72 @@
 columns:
-    ID: int64,
-    Project Code: object,
-    "PQ #": object,
-    "PO / SO #": object,
-    "ASN/DN #": object,
-    Country: object,
-    Managed By: object,
-    Fulfill Via: object,
-    Vendor INCO Term: object,
-    Shipment Mode: object,
-    PQ First Sent to Client Date: object,
-    PO Sent to Vendor Date: object,
-    Scheduled Delivery Date: object,
-    Delivered to Client Date: object,
-    Delivery Recorded Date: object,
-    Product Group: object,
-    Sub Classification: object,
-    Vendor: object,
-    Item Description: object,
-    Molecule/Test Type: object,
-    Brand: object,
-    Dosage: object,
-    Dosage Form: object,
-    Unit of Measure (Per Pack): int64,
-    Line Item Quantity: int64,
-    Line Item Value: float64,
-    Pack Price: float64,
-    Unit Price: float64,
-    Manufacturing Site: object,
-    First Line Designation: object,
-    Weight (Kilograms): object,
-    Freight Cost (USD): object,
+    ID: int64
+    Project Code: O
+    "PQ #": O
+    "PO / SO #": O
+    "ASN/DN #": O
+    Country: O
+    Managed By: O
+    Fulfill Via: O
+    Vendor INCO Term: O
+    Shipment Mode: O
+    PQ First Sent to Client Date: O
+    PO Sent to Vendor Date: O
+    Scheduled Delivery Date: O
+    Delivered to Client Date: O
+    Delivery Recorded Date: O
+    Product Group: O
+    Sub Classification: O
+    Vendor: O
+    Item Description: O
+    Molecule/Test Type: O
+    Brand: O
+    Dosage: O
+    Dosage Form: O
+    Unit of Measure (Per Pack): int64
+    Line Item Quantity: int64
+    Line Item Value: float64
+    Pack Price: float64
+    Unit Price: float64
+    Manufacturing Site: O
+    First Line Designation: O
+    Weight (Kilograms): O
+    Freight Cost (USD): O
     Line Item Insurance (USD): float64
+
+numerical_columns:
+    - ID
+    - Unit of Measure (Per Pack)
+    - Line Item Quantity
+    - Line Item Value
+    - Line Item Insurance (USD)
+
+categorical_columns:
+    - Project Code
+    - "PQ #"
+    - "PO / SO #"
+    - "ASN/DN #"
+    - Country
+    - Managed By
+    - Fulfill Via
+    - Vendor INCO Term
+    - Shipment Mode
+    - PQ First Sent to Client Date
+    - PO Sent to Vendor Date
+    - Scheduled Delivery Date
+    - Delivered to Client Date
+    - Delivery Recorded Date
+    - Product Group
+    - Sub Classification
+    - Vendor
+    - Item Description
+    - Molecule/Test Type
+    - Brand
+    - Dosage
+    - Dosage Form
+    - Manufacturing Site
+    - First Line Designation
+    - Weight (Kilograms)
+    - Freight Cost (USD)
 
 target_column_1: Pack Price
 
