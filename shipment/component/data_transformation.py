@@ -1,6 +1,6 @@
 from shipment.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact, \
     DataTransformationArtifact
-from shipment.utils.util import load_data, read_yaml_file
+from shipment.utils.util import load_data, read_yaml_file, save_object
 from sklearn.model_selection import train_test_split
 from shipment.entity.config_entity import DataTransformationConfig
 from sklearn.preprocessing import StandardScaler
@@ -84,7 +84,7 @@ class DataTransformation:
             X_train = pd.DataFrame(scaler.transform(X_train), index=X_train.index, columns=X_train.columns)
             X_test = pd.DataFrame(scaler.transform(X_test), index=X_test.index, columns=X_test.columns)
 
-            return X_train, X_test, y_train, y_test
+            return X_train, X_test, y_train, y_test, scaler
         except Exception as e:
             raise ShipmentException(e, sys) from e
 
@@ -105,16 +105,22 @@ class DataTransformation:
             target_column_2 = schema[TARGET_COLUMNS_KEY_2]
 
             logging.info(f"Applying preprocessing object on raw dataframe")
-            X_train_t1, X_test_t1, y_train_t1, y_test_t1 = self.preprocess_inputs(raw_df, target_column_1)
-            X_train_t2, X_test_t2, y_train_t2, y_test_t2 = self.preprocess_inputs(raw_df, target_column_2)
+            X_train_t1, X_test_t1, y_train_t1, y_test_t1, scaler_1 = self.preprocess_inputs(raw_df, target_column_1)
+            X_train_t2, X_test_t2, y_train_t2, y_test_t2, scaler_2 = self.preprocess_inputs(raw_df, target_column_2)
 
             transformed_train_dir = self.data_transformation_config.transformed_train_dir
             transformed_test_dir = self.data_transformation_config.transformed_test_dir
 
-            dir_path = os.path.dirname(transformed_train_dir + r"\train")
-            os.makedirs(dir_path, exist_ok=True)
-            dir_path = os.path.dirname(transformed_test_dir + r"\test")
-            os.makedirs(dir_path, exist_ok=True)
+            preprocessing_obj_file_path = self.data_transformation_config.preprocessed_object_file_path
+
+            logging.info(f"Saving preprocessing object.")
+            save_object(file_path=preprocessing_obj_file_path.replace(".pkl", "_target_1.pkl"), obj=scaler_1)
+            save_object(file_path=preprocessing_obj_file_path.replace(".pkl", "_target_2.pkl"), obj=scaler_2)
+
+            dir_path_train = os.path.dirname(transformed_train_dir + r"\train")
+            os.makedirs(dir_path_train, exist_ok=True)
+            dir_path_test = os.path.dirname(transformed_test_dir + r"\test")
+            os.makedirs(dir_path_test, exist_ok=True)
 
             logging.info("Transformed file saved in Transformed folder")
             X_train_t1.to_csv(transformed_train_dir + r"\X_train_t1.csv")
@@ -132,8 +138,9 @@ class DataTransformation:
             data_transformation_artifact = \
                 DataTransformationArtifact(is_transformed=True,
                                            message="Data transformation successfully.",
-                                           transformed_train_dir=transformed_train_dir,
-                                           transformed_test_dir=transformed_test_dir
+                                           transformed_train_dir=dir_path_train,
+                                           transformed_test_dir=dir_path_test,
+                                           preprocessed_object_file_path=preprocessing_obj_file_path
                                            )
             logging.info(f"Data transformation artifact: {data_transformation_artifact}")
             return data_transformation_artifact
