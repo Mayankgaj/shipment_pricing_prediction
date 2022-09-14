@@ -1,9 +1,11 @@
 from shipment.config.configuration import Configuration
 from shipment.exception import ShipmentException
-from shipment.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact, DataTransformationArtifact
+from shipment.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact, DataTransformationArtifact, \
+    ModelTrainerArtifact
 from shipment.component.data_ingestion import DataIngestion
 from shipment.component.data_validation import DataValidation
 from shipment.component.data_transformation import DataTransformation
+from shipment.component.model_trainer import ModelTrainer
 import sys
 
 
@@ -46,6 +48,15 @@ class Pipeline:
         except Exception as e:
             raise ShipmentException(e, sys) from e
 
+    def start_model_trainer(self, data_transformation_artifact: DataTransformationArtifact) -> ModelTrainerArtifact:
+        try:
+            model_trainer = ModelTrainer(model_trainer_config=self.config.get_model_trainer_config(),
+                                         data_transformation_artifact=data_transformation_artifact
+                                         )
+            return model_trainer.initiate_model_trainer()
+        except Exception as e:
+            raise ShipmentException(e, sys) from e
+
     def run_pipeline(self):
         try:
             # data ingestion
@@ -53,8 +64,8 @@ class Pipeline:
             data_validation_artifact = self.start_data_validation(data_ingestion_artifact=data_ingestion_artifact)
             data_transformation_artifact = self.start_data_transformation(
                 data_ingestion_artifact=data_ingestion_artifact,
-                data_validation_artifact=data_validation_artifact
-            )
+                data_validation_artifact=data_validation_artifact)
+            model_trainer_artifact = self.start_model_trainer(data_transformation_artifact=data_transformation_artifact)
 
         except Exception as e:
             raise ShipmentException(e, sys) from e
