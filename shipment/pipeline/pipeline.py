@@ -1,11 +1,12 @@
 from shipment.config.configuration import Configuration
 from shipment.exception import ShipmentException
 from shipment.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact, DataTransformationArtifact, \
-    ModelTrainerArtifact
+    ModelTrainerArtifact, ModelPusherArtifact
 from shipment.component.data_ingestion import DataIngestion
 from shipment.component.data_validation import DataValidation
 from shipment.component.data_transformation import DataTransformation
 from shipment.component.model_trainer import ModelTrainer
+from shipment.component.model_pusher import ModelPusher
 import sys
 
 
@@ -57,6 +58,16 @@ class Pipeline:
         except Exception as e:
             raise ShipmentException(e, sys) from e
 
+    def start_model_pusher(self) -> ModelPusherArtifact:
+        try:
+            model_pusher = ModelPusher(
+                model_pusher_config=self.config.get_model_pusher_config(),
+                model_trainer_config=self.config.get_model_trainer_config()
+            )
+            return model_pusher.initiate_model_pusher()
+        except Exception as e:
+            raise ShipmentException(e, sys) from e
+
     def run_pipeline(self):
         try:
             # data ingestion
@@ -66,7 +77,7 @@ class Pipeline:
                 data_ingestion_artifact=data_ingestion_artifact,
                 data_validation_artifact=data_validation_artifact)
             model_trainer_artifact = self.start_model_trainer(data_transformation_artifact=data_transformation_artifact)
-
+            model_pusher = self.start_model_pusher()
         except Exception as e:
             raise ShipmentException(e, sys) from e
         
