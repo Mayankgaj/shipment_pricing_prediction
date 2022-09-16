@@ -1,14 +1,59 @@
 from shipment.entity.artifact_entity import DataIngestionArtifact, DataValidationArtifact, \
     DataTransformationArtifact
-from shipment.utils.util import load_data, read_yaml_file, save_object
-from sklearn.model_selection import train_test_split
+from shipment.utils.util import load_data, read_yaml_file, save_object, save_numpy_array_data
 from shipment.entity.config_entity import DataTransformationConfig
-from sklearn.preprocessing import StandardScaler
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from shipment.exception import ShipmentException
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
 from shipment.logger import logging
 from shipment.constant import *
 import pandas as pd
+import numpy as np
 import sys, os
+
+
+class FeatureGenerator(BaseEstimator, TransformerMixin):
+
+    def __init__(self, columns=None):
+        try:
+            self.columns = columns
+        except Exception as e:
+            raise ShipmentException(e, sys) from e
+
+    def fit(self, X):
+        return self
+
+    def transform(self, X: pd.DataFrame):
+        try:
+            df: pd.DataFrame = X.copy()
+            columns_remove = ['ID', 'PQ First Sent to Client Date', 'PO Sent to Vendor Date', 'Weight (Kilograms)',
+                              'Freight Cost (USD)', 'PQ #', 'PO / SO #', 'ASN/DN #']
+            for i in columns_remove:
+                if i in df:
+                    df.drop(i, axis=1, inplace=True)
+                    logging.info(f"Dropped column {i} from {str(X)}")
+
+            for column in ['Scheduled Delivery Date', 'Delivered to Client Date', 'Delivery Recorded Date']:
+                if column in df:
+                    df[column] = pd.to_datetime(df[column])
+                    df[column + ' Year'] = df[column].apply(lambda x: x.year)
+                    df[column + ' Month'] = df[column].apply(lambda x: x.month)
+                    df[column + ' Day'] = df[column].apply(lambda x: x.day)
+                    df = df.drop(column, axis=1)
+                    logging.info(f"Converting date column ")
+
+            binary_columns = ['Fulfill Via', 'First Line Designation']
+            for i in binary_columns:
+                if i in df:
+                    df['Fulfill Via'] = df['Fulfill Via'].replace({'Direct Drop': 0, 'From RDC': 1})
+                    df['First Line Designation'] = df['First Line Designation'].replace({'No': 0, 'Yes': 1})
+
+            return df
+        except Exception as e:
+            raise ShipmentException(e, sys) from e
 
 
 class DataTransformation:
@@ -26,120 +71,134 @@ class DataTransformation:
         except Exception as e:
             raise ShipmentException(e, sys) from e
 
-    @staticmethod
-    def preprocess_inputs(df, target):
+    def get_data_transformer_object(self) -> ColumnTransformer:
         try:
-            df = df.copy()
+            schema_file_path = self.data_validation_artifact.schema_file_path
 
-            # Drop ID column
-            df = df.drop('ID', axis=1)
+            dataset_schema = read_yaml_file(file_path=schema_file_path)
 
-            # Drop missing target rows
-            missing_target_rows = df[df['Shipment Mode'].isna()].index
-            df = df.drop(missing_target_rows, axis=0).reset_index(drop=True)
+            numerical_columns = dataset_schema[NUMERICAL_COLUMN_KEY]
+            categorical_columns = dataset_schema[CATEGORICAL_COLUMN_KEY]
 
-            # Fill missing values
-            df['Dosage'] = df['Dosage'].fillna(df['Dosage'].mode()[0])
-            df['Line Item Insurance (USD)'] = df['Line Item Insurance (USD)'].fillna(
-                df['Line Item Insurance (USD)'].mean())
-            df['Shipment Mode'] = df['Shipment Mode'].fillna(df['Shipment Mode'].mode()[0])
+            columns_remove = ['ID', 'PQ First Sent to Client Date', 'PO Sent to Vendor Date', 'Weight (Kilograms)',
+                              'Freight Cost (USD)', 'PQ #', 'PO / SO #', 'ASN/DN #']
 
-            # Drop date columns with too many missing values
-            df = df.drop(['PQ First Sent to Client Date', 'PO Sent to Vendor Date'], axis=1)
+            for i in columns_remove:
+                if i in numerical_columns:
+                    numerical_columns.remove(i)
+                elif i in categorical_columns:
+                    categorical_columns.remove(i)
 
-            # Extract date features
-            for column in ['Scheduled Delivery Date', 'Delivered to Client Date', 'Delivery Recorded Date']:
-                df[column] = pd.to_datetime(df[column])
-                df[column + ' Year'] = df[column].apply(lambda x: x.year)
-                df[column + ' Month'] = df[column].apply(lambda x: x.month)
-                df[column + ' Day'] = df[column].apply(lambda x: x.day)
-                df = df.drop(column, axis=1)
+            num_pipeline = Pipeline(steps=[
+                ('imputer', SimpleImputer(strategy="median")),
+                ('feature_generator', FeatureGenerator()),
+                ('scaler', StandardScaler())
+            ]
+            )
 
-            # Drop numeric columns with too many missing values
-            df = df.drop(['Weight (Kilograms)', 'Freight Cost (USD)'], axis=1)
+            cat_pipeline = Pipeline(steps=[
+                ('impute', SimpleImputer(strategy="most_frequent")),
+                ('one_hot_encoder', OneHotEncoder()),
+                ('scaler', StandardScaler(with_mean=False))
+            ]
+            )
 
-            # Drop high-cardinality columns
-            df = df.drop(['PQ #', 'PO / SO #', 'ASN/DN #'], axis=1)
+            logging.info(f"Categorical columns: {categorical_columns}")
+            logging.info(f"Numerical columns: {numerical_columns}")
 
-            # Binary encoding
-            df['Fulfill Via'] = df['Fulfill Via'].replace({'Direct Drop': 0, 'From RDC': 1})
-            df['First Line Designation'] = df['First Line Designation'].replace({'No': 0, 'Yes': 1})
+            preprocessing = ColumnTransformer([
+                ('num_pipeline', num_pipeline, numerical_columns),
+                ('cat_pipeline', cat_pipeline, categorical_columns),
+            ])
+            return preprocessing
 
-            # One-hot encoding
-            for column in df.select_dtypes('object'):
-                dummies = pd.get_dummies(df[column], prefix=column)
-                df = pd.concat([df, dummies], axis=1)
-                df = df.drop(column, axis=1)
+        except Exception as e:
+            raise ShipmentException(e, sys) from e
 
-            # Split df into X and y
-            y = df[target]
-            X = df.drop(target, axis=1)
-
-            # Train-test split
-            X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True, random_state=1)
-
-            # Scale X
-            scaler = StandardScaler()
-            scaler.fit(X_train)
-            X_train = pd.DataFrame(scaler.transform(X_train), index=X_train.index, columns=X_train.columns)
-            X_test = pd.DataFrame(scaler.transform(X_test), index=X_test.index, columns=X_test.columns)
-
-            return X_train, X_test, y_train, y_test, scaler
+    @staticmethod
+    def remove_unique_values(train, test):
+        try:
+            logging.info(f"Started Removing values from Columns which where not present in train dataset")
+            for i in train.select_dtypes('object').drop(
+                    ['Scheduled Delivery Date', 'Delivered to Client Date', 'Delivery Recorded Date'], axis=1):
+                list_test = test[i].unique()
+                remove = []
+                for j in list_test:
+                    if j in train[i].unique():
+                        pass
+                    else:
+                        remove.append(j)
+                for k in remove:
+                    index = test.index[test[i] == k].to_list()
+                    test.drop(index=index, axis=0, inplace=True)
+            logging.info(f"Finished Removing values from Columns which where not present in train dataset")
+            return train, test
         except Exception as e:
             raise ShipmentException(e, sys) from e
 
     def initiate_data_transformation(self) -> DataTransformationArtifact:
         try:
 
-            logging.info(f"Obtaining raw file path.")
-            raw_file_path = self.data_ingestion_artifact.raw_file_path
+            logging.info(f"Obtaining preprocessing object.")
+            preprocessing_obj = self.get_data_transformer_object()
+
+            logging.info(f"Obtaining training and test file path.")
+            train_file_path = self.data_ingestion_artifact.train_file_path
+            test_file_path = self.data_ingestion_artifact.test_file_path
 
             schema_file_path = self.data_validation_artifact.schema_file_path
 
-            logging.info(f"Loading raw data as pandas dataframe.")
-            raw_df = load_data(file_path=raw_file_path, schema_file_path=schema_file_path)
+            logging.info(f"Loading training and test data as pandas dataframe.")
+            train_df_na = load_data(file_path=train_file_path, schema_file_path=schema_file_path)
+
+            test_df_na = load_data(file_path=test_file_path, schema_file_path=schema_file_path)
+
+            train_df, test_df = self.remove_unique_values(train=train_df_na, test=test_df_na)
 
             schema = read_yaml_file(file_path=schema_file_path)
 
-            target_column_1 = schema[TARGET_COLUMNS_KEY_1]
-            target_column_2 = schema[TARGET_COLUMNS_KEY_2]
+            target_column_name = schema[TARGET_COLUMNS_KEY]
 
-            logging.info(f"Applying preprocessing object on raw dataframe")
-            X_train_t1, X_test_t1, y_train_t1, y_test_t1, scaler_1 = self.preprocess_inputs(raw_df, target_column_1)
-            X_train_t2, X_test_t2, y_train_t2, y_test_t2, scaler_2 = self.preprocess_inputs(raw_df, target_column_2)
+            logging.info(f"Splitting input and target feature from training and testing dataframe.")
+            input_feature_train_df = train_df.drop(columns=[target_column_name], axis=1)
+            target_feature_train_df = train_df[target_column_name]
+
+            input_feature_test_df = test_df.drop(columns=[target_column_name], axis=1)
+            target_feature_test_df = test_df[target_column_name]
+
+            logging.info(f"Applying preprocessing object on training dataframe and testing dataframe")
+            input_feature_train_arr = preprocessing_obj.fit_transform(input_feature_train_df)
+            input_feature_test_arr = preprocessing_obj.transform(input_feature_test_df)
+            logging.info(f"input train type : {type(input_feature_train_arr)}"
+                         f"target train type : {type(target_feature_train_df)}")
+
+            train_arr = np.c_[input_feature_train_arr.toarray(), np.array(target_feature_train_df)]
+            test_arr = np.c_[input_feature_test_arr.toarray(), np.array(target_feature_test_df)]
 
             transformed_train_dir = self.data_transformation_config.transformed_train_dir
             transformed_test_dir = self.data_transformation_config.transformed_test_dir
 
+            train_file_name = os.path.basename(train_file_path).replace(".csv", ".npz")
+            test_file_name = os.path.basename(test_file_path).replace(".csv", ".npz")
+
+            transformed_train_file_path = os.path.join(transformed_train_dir, train_file_name)
+            transformed_test_file_path = os.path.join(transformed_test_dir, test_file_name)
+
+            logging.info(f"Saving transformed training and testing array.")
+
+            save_numpy_array_data(file_path=transformed_train_file_path, array=train_arr)
+            save_numpy_array_data(file_path=transformed_test_file_path, array=test_arr)
+
             preprocessing_obj_file_path = self.data_transformation_config.preprocessed_object_file_path
 
             logging.info(f"Saving preprocessing object.")
-            save_object(file_path=preprocessing_obj_file_path.replace(".pkl", "_target_1.pkl"), obj=scaler_1)
-            save_object(file_path=preprocessing_obj_file_path.replace(".pkl", "_target_2.pkl"), obj=scaler_2)
-
-            dir_path_train = os.path.dirname(transformed_train_dir + r"\train")
-            os.makedirs(dir_path_train, exist_ok=True)
-            dir_path_test = os.path.dirname(transformed_test_dir + r"\test")
-            os.makedirs(dir_path_test, exist_ok=True)
-
-            logging.info("Transformed file saved in Transformed folder")
-            X_train_t1.to_csv(transformed_train_dir + r"\X_train_t1.csv")
-            y_train_t1.to_csv(transformed_train_dir + r"\y_train_t1.csv")
-            X_train_t2.to_csv(transformed_train_dir + r"\X_train_t2.csv")
-            y_train_t2.to_csv(transformed_train_dir + r"\y_train_t2.csv")
-
-            X_test_t1.to_csv(transformed_test_dir + r"\X_test_t1.csv")
-            y_test_t1.to_csv(transformed_test_dir + r"\y_test_t1.csv")
-            X_test_t2.to_csv(transformed_test_dir + r"\X_test_t2.csv")
-            y_test_t2.to_csv(transformed_test_dir + r"\y_test_t2.csv")
-
-            logging.info(f"Transformed files Saved in Transformed Folder Successfully")
+            save_object(file_path=preprocessing_obj_file_path, obj=preprocessing_obj)
 
             data_transformation_artifact = \
                 DataTransformationArtifact(is_transformed=True,
                                            message="Data transformation successfully.",
-                                           transformed_train_dir=dir_path_train,
-                                           transformed_test_dir=dir_path_test,
+                                           transformed_train_file_path=transformed_train_file_path,
+                                           transformed_test_file_path=transformed_test_file_path,
                                            preprocessed_object_file_path=preprocessing_obj_file_path
                                            )
             logging.info(f"Data transformation artifact: {data_transformation_artifact}")
