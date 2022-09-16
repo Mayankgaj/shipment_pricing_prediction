@@ -26,6 +26,9 @@ DATA_INGESTION_ARTIFACT_DIR = "data_ingestion"
 DATA_INGESTION_AUTHOR_USERNAME_KEY = "author_username"
 DATA_INGESTION_DATASET_KEY = "kaggel_dataset_name"
 DATA_INGESTION_RAW_DATA_DIR_KEY = "raw_data_dir"
+DATA_INGESTION_INGESTED_DIR_NAME_KEY = "ingested_dir"
+DATA_INGESTION_TRAIN_DIR_KEY = "ingested_train_dir"
+DATA_INGESTION_TEST_DIR_KEY = "ingested_test_dir"
 
 # Data Validation related variables
 

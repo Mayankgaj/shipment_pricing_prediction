@@ -2,7 +2,9 @@ from shipment.entity.artifact_entity import DataIngestionArtifact
 from shipment.entity.config_entity import DataIngestionConfig
 from kaggle.api.kaggle_api_extended import KaggleApi
 from shipment.exception import ShipmentException
+from sklearn.model_selection import train_test_split
 from shipment.logger import logging
+import pandas as pd
 import sys, os
 
 
@@ -45,7 +47,31 @@ class DataIngestion:
 
             shipment_file_path = os.path.join(raw_data_dir, file_name)
 
-            data_ingestion_artifact = DataIngestionArtifact(raw_file_path=shipment_file_path,
+            logging.info(f"Reading csv file: [{shipment_file_path}]")
+            shipment_data_frame = pd.read_csv(shipment_file_path)
+
+            logging.info(f"Splitting data into train and test")
+
+            strat_train_set, strat_test_set = train_test_split(shipment_data_frame, test_size=0.2, random_state=42)
+
+            train_file_path = os.path.join(self.data_ingestion_config.ingested_train_dir,
+                                           file_name)
+
+            test_file_path = os.path.join(self.data_ingestion_config.ingested_test_dir,
+                                          file_name)
+
+            if strat_train_set is not None:
+                os.makedirs(self.data_ingestion_config.ingested_train_dir, exist_ok=True)
+                logging.info(f"Exporting training dataset to file: [{train_file_path}]")
+                strat_train_set.to_csv(train_file_path, index=False)
+
+            if strat_test_set is not None:
+                os.makedirs(self.data_ingestion_config.ingested_test_dir, exist_ok=True)
+                logging.info(f"Exporting testing dataset to file: [{test_file_path}]")
+                strat_test_set.to_csv(test_file_path, index=False)
+
+            data_ingestion_artifact = DataIngestionArtifact(train_file_path=train_file_path,
+                                                            test_file_path=test_file_path,
                                                             is_ingested=True,
                                                             message=f"Data ingestion completed successfully."
                                                             )

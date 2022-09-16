@@ -39,6 +39,7 @@ numerical_columns:
     - Line Item Quantity
     - Line Item Value
     - Line Item Insurance (USD)
+    - Pack Price
 
 categorical_columns:
     - Project Code
@@ -68,8 +69,6 @@ categorical_columns:
     - Weight (Kilograms)
     - Freight Cost (USD)
 
-target_column_1: Pack Price
-
-target_column_2: Unit Price
+target_column: Unit Price
 
 number_of_column : 33

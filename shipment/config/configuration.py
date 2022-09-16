@@ -37,10 +37,25 @@ class Configuration:
                                         data_ingestion_info[DATA_INGESTION_RAW_DATA_DIR_KEY]
                                         )
 
+            ingested_data_dir = os.path.join(
+                data_ingestion_artifact_dir,
+                data_ingestion_info[DATA_INGESTION_INGESTED_DIR_NAME_KEY]
+            )
+            ingested_train_dir = os.path.join(
+                ingested_data_dir,
+                data_ingestion_info[DATA_INGESTION_TRAIN_DIR_KEY]
+            )
+            ingested_test_dir = os.path.join(
+                ingested_data_dir,
+                data_ingestion_info[DATA_INGESTION_TEST_DIR_KEY]
+            )
+
             data_ingestion_config = DataIngestionConfig(
                 author_username=username,
                 kaggel_dataset_name=dataset_name,
-                raw_data_dir=raw_data_dir
+                raw_data_dir=raw_data_dir,
+                ingested_train_dir=ingested_train_dir,
+                ingested_test_dir=ingested_test_dir
             )
             logging.info(f"Data Ingestion config: {data_ingestion_config}")
             return data_ingestion_config
