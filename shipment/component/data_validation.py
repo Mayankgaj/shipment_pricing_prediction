@@ -3,8 +3,13 @@ from shipment.entity.config_entity import DataValidationConfig
 from shipment.exception import ShipmentException
 from shipment.utils.util import read_yaml_file
 from shipment.logger import logging
+from evidently.model_profile import Profile
+from evidently.model_profile.sections import DataDriftProfileSection
+from evidently.dashboard import Dashboard
+from evidently.dashboard.tabs import DataDriftTab
 import pandas as pd
-import sys
+import sys, os
+import json
 
 
 class DataValidation:
@@ -18,10 +23,33 @@ class DataValidation:
         except Exception as e:
             raise ShipmentException(e, sys) from e
 
-    def get_raw_df(self):
+    def get_train_and_test_df(self):
         try:
-            raw_df = pd.read_csv(self.data_ingestion_artifact.raw_file_path)
-            return raw_df
+            train_df = self.data_ingestion_artifact.train_file_path
+            test_df = self.data_ingestion_artifact.test_file_path
+            return train_df, test_df
+        except Exception as e:
+            raise ShipmentException(e, sys) from e
+
+    def is_train_test_file_exists(self) -> bool:
+        try:
+            logging.info("Checking if training and test file is available")
+
+            is_train_file_exist = os.path.exists(self.data_ingestion_artifact.train_file_path)
+            is_test_file_exist = os.path.exists(self.data_ingestion_artifact.test_file_path)
+
+            is_available = is_train_file_exist and is_test_file_exist
+
+            logging.info(f"Is train and test file exists?-> {is_available}")
+
+            if not is_available:
+                training_file = self.data_ingestion_artifact.train_file_path
+                testing_file = self.data_ingestion_artifact.test_file_path
+                message = f"Training file: {training_file} or Testing file: {testing_file}" \
+                          "is not present"
+                raise Exception(message)
+
+            return is_available
         except Exception as e:
             raise ShipmentException(e, sys) from e
 
@@ -69,10 +97,9 @@ class DataValidation:
                               f"Required is {config_col_num}, but in {file_name} file is {num_col_file}")
                 num_check = False
 
-            target_col_1 = config["target_column_1"]
-            target_col_2 = config["target_column_2"]
+            target_col = config["target_column"]
             logging.info(f"Checking Target columns in {file_name}")
-            if (target_col_1 and target_col_2) in read_file.columns:
+            if target_col in read_file.columns:
                 target_check = True
             else:
                 logging.error(f"In {file_name} file Target column is not Matching with Schema Config")
@@ -86,23 +113,75 @@ class DataValidation:
     def validate_dataset_schema(self) -> bool:
         try:
             config = read_yaml_file(self.data_validation_config.schema_file_path)
-            raw = self.data_ingestion_artifact.raw_file_path
+            train_df, test_df = self.get_train_and_test_df()
 
-            raw_col_check = self.check_columns_details(raw, config)
-            raw_num_target = self.check_num_and_target_col(raw, config)
+            train_col_check = self.check_columns_details(train_df, config)
+            train_num_target = self.check_num_and_target_col(train_df, config)
+            test_col_check = self.check_columns_details(test_df, config)
+            test_num_target = self.check_num_and_target_col(test_df, config)
 
-            result = raw_num_target and raw_col_check
+            result = train_col_check and train_num_target and test_num_target and test_col_check
             return result
 
         except Exception as e:
             raise ShipmentException(e, sys) from e
 
+    def get_and_save_data_drift_report(self):
+        try:
+            profile = Profile(sections=[DataDriftProfileSection()])
+
+            train_df_str, test_df_str = self.get_train_and_test_df()
+            train_df = pd.read_csv(train_df_str)
+            test_df = pd.read_csv(test_df_str)
+
+            profile.calculate(train_df, test_df)
+
+            report = json.loads(profile.json())
+
+            report_file_path = self.data_validation_config.report_file_path
+            report_dir = os.path.dirname(report_file_path)
+            os.makedirs(report_dir, exist_ok=True)
+
+            with open(report_file_path, "w") as report_file:
+                json.dump(report, report_file, indent=6)
+            return report
+        except Exception as e:
+            raise ShipmentException(e, sys) from e
+
+    def save_data_drift_report_page(self):
+        try:
+            dashboard = Dashboard(tabs=[DataDriftTab()])
+            train_df_str, test_df_str = self.get_train_and_test_df()
+            train_df = pd.read_csv(train_df_str)
+            test_df = pd.read_csv(test_df_str)
+            dashboard.calculate(train_df, test_df)
+
+            report_page_file_path = self.data_validation_config.report_page_file_path
+            report_page_dir = os.path.dirname(report_page_file_path)
+            os.makedirs(report_page_dir, exist_ok=True)
+
+            dashboard.save(report_page_file_path)
+        except Exception as e:
+            raise ShipmentException(e, sys)from e
+
+    def is_data_drift_found(self) -> bool:
+        try:
+            self.get_and_save_data_drift_report()
+            self.save_data_drift_report_page()
+            return True
+        except Exception as e:
+            raise ShipmentException(e, sys) from e
+
     def initiate_data_validation(self) -> DataValidationArtifact:
         try:
+            self.is_train_test_file_exists()
             self.validate_dataset_schema()
-            schema_path = self.data_validation_config.schema_file_path
+            self.is_data_drift_found()
+
             data_validation_artifact = DataValidationArtifact(
-                schema_file_path=schema_path,
+                schema_file_path=self.data_validation_config.schema_file_path,
+                report_file_path=self.data_validation_config.report_file_path,
+                report_page_file_path=self.data_validation_config.report_page_file_path,
                 is_validated=True,
                 message="Data Validation performed successfully."
             )
