@@ -34,5 +34,5 @@ jobs:
         mv .github/workflows/demo.py ./
         python demo.py
       env:
-          KAGGLE_USERNAME: ${{ secrets.KaggleUsername }}
-          KAGGLE_KEY: ${{ secrets.KaggleKey }}
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
