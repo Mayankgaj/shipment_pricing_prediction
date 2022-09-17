@@ -22,6 +22,6 @@ jobs:
     - name: clone demo script
       run: git clone https://github.com/Mayankgaj/demo_script.git --depth=1 demo
     - name: clone scorce
-      run: git clone https://github.com/Mayankgaj/shipment_pricing_prediction.git --depth=1 shipment
+      run: git clone https://github.com/Mayankgaj/shipment_pricing_prediction.git --depth=1 -b "one_target" shipment
            mv ./demo/*.py ./shipment
            $CONDA/bin/conda python demo.py
