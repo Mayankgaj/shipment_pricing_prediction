@@ -37,8 +37,8 @@ MetricInfoArtifact = namedtuple("MetricInfoArtifact",
                                  "test_accuracy", "model_accuracy", "index_number"])
 
 
-def evaluate_regression_model(model_list: list, X_train, y_train, X_test,
-                              y_test, base_accuracy: float = 0.6) -> MetricInfoArtifact:
+def evaluate_regression_model(model_list: list, X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray,
+                              y_test: np.ndarray, base_accuracy: float = 0.6) -> MetricInfoArtifact:
     """
     Description:
     This function compare multiple regression model return best model
@@ -198,11 +198,11 @@ class ModelFactory:
     def execute_grid_search_operation(self, initialized_model: InitializedModelDetail, input_feature,
                                       output_feature) -> GridSearchedBestModel:
         """
-        execute_grid_search_operation(): function will perform parameter search operation and
+        execute_grid_search_operation(): function will perform parameter search operation, and
         it will return you the best optimistic  model with the best parameter:
         estimator: Model object
         param_grid: dictionary of parameter to perform search operation
-        input_feature: your all input features
+        input_feature: client all input features
         output_feature: Target/Dependent features
         ================================================================================
         return: Function will return GridSearchOperation object
@@ -223,6 +223,7 @@ class ModelFactory:
 
             grid_search_cv.fit(input_feature, output_feature)
             message = f'{">>" * 30} f"Training {type(initialized_model.model).__name__}" completed {"<<" * 30}'
+            logging.info(message)
             grid_searched_best_model = GridSearchedBestModel(model_serial_number=initialized_model.model_serial_number,
                                                              model=initialized_model.model,
                                                              best_model=grid_search_cv.best_estimator_,
@@ -273,11 +274,11 @@ class ModelFactory:
                                                              input_feature,
                                                              output_feature) -> GridSearchedBestModel:
         """
-        initiate_best_model_parameter_search(): function will perform parameter search operation and
-        it will return you the best optimistic  model with best parameter:
+        initiate_best_model_parameter_search(): function will perform parameter search operation, and
+        it will return you the best optimistic  model with the best parameter:
         estimator: Model object
         param_grid: dictionary of parameter to perform search operation
-        input_feature: your all input features
+        input_feature: yours all input features
         output_feature: Target/Dependent features
         ================================================================================
         return: Function will return a GridSearchOperation
@@ -352,4 +353,4 @@ class ModelFactory:
             return ModelFactory.get_best_model_from_grid_searched_best_model_list(grid_searched_best_model_list,
                                                                                   base_accuracy=base_accuracy)
         except Exception as e:
-            raise ShipmentException(e, sys)
+            raise ShipmentException(e, sys) from e

@@ -26,9 +26,13 @@ class FeatureGenerator(BaseEstimator, TransformerMixin):
     def fit(self, X):
         return self
 
-    def transform(self, X: pd.DataFrame):
+    def transform(self, X):
         try:
-            df: pd.DataFrame = X.copy()
+            if self.columns is None:
+                df: pd.DataFrame = X.copy()
+            else:
+                df = pd.DataFrame(X, columns=self.columns)
+
             columns_remove = ['ID', 'PQ First Sent to Client Date', 'PO Sent to Vendor Date', 'Weight (Kilograms)',
                               'Freight Cost (USD)', 'PQ #', 'PO / SO #', 'ASN/DN #']
             for i in columns_remove:
@@ -51,7 +55,18 @@ class FeatureGenerator(BaseEstimator, TransformerMixin):
                     df['Fulfill Via'] = df['Fulfill Via'].replace({'Direct Drop': 0, 'From RDC': 1})
                     df['First Line Designation'] = df['First Line Designation'].replace({'No': 0, 'Yes': 1})
 
-            return df
+            object_type = ['Country', 'Managed By', 'Vendor INCO Term',
+                           'Shipment Mode', 'Product Group', 'Sub Classification', 'Vendor',
+                           'Item Description', 'Molecule/Test Type', 'Brand', 'Dosage',
+                           'Dosage Form', 'Manufacturing Site','Project Code']
+
+            if self.columns is not None:
+                one_hot_encoder = OneHotEncoder()
+                df_cat = one_hot_encoder.fit_transform(df[object_type])
+                transform_cat = df_cat.toarray()
+                return transform_cat
+            else:
+                return df
         except Exception as e:
             raise ShipmentException(e, sys) from e
 
@@ -98,8 +113,8 @@ class DataTransformation:
 
             cat_pipeline = Pipeline(steps=[
                 ('impute', SimpleImputer(strategy="most_frequent")),
-                ('one_hot_encoder', OneHotEncoder()),
-                ('scaler', StandardScaler(with_mean=False))
+                ('feature_generator', FeatureGenerator(columns=categorical_columns)),
+                ('scaler', StandardScaler())
             ]
             )
 
@@ -169,11 +184,9 @@ class DataTransformation:
             logging.info(f"Applying preprocessing object on training dataframe and testing dataframe")
             input_feature_train_arr = preprocessing_obj.fit_transform(input_feature_train_df)
             input_feature_test_arr = preprocessing_obj.transform(input_feature_test_df)
-            logging.info(f"input train type : {type(input_feature_train_arr)}"
-                         f"target train type : {type(target_feature_train_df)}")
 
-            train_arr = np.c_[input_feature_train_arr.toarray(), np.array(target_feature_train_df)]
-            test_arr = np.c_[input_feature_test_arr.toarray(), np.array(target_feature_test_df)]
+            train_arr = np.c_[input_feature_train_arr, np.array(target_feature_train_df)]
+            test_arr = np.c_[input_feature_test_arr, np.array(target_feature_test_df)]
 
             transformed_train_dir = self.data_transformation_config.transformed_train_dir
             transformed_test_dir = self.data_transformation_config.transformed_test_dir
