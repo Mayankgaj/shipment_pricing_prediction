@@ -33,3 +33,6 @@ jobs:
       run: |
         mv .github/workflows/demo.py ./
         python demo.py
+      env:
+          KAGGLE_USERNAME: ${{ secrets.KaggleUsername }}
+          KAGGLE_KEY: ${{ secrets.KaggleKey }}
