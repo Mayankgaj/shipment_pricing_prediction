@@ -15,5 +15,4 @@ ModelTrainerArtifact = namedtuple("ModelTrainerArtifact", ["is_trained", "messag
                                                            "train_rmse", "test_rmse", "train_accuracy", "test_accuracy",
                                                            "model_accuracy"])
 
-ModelPusherArtifact = namedtuple("ModelPusherArtifact", ["is_model_pusher", "export_model_file_path_t1",
-                                                         "export_model_file_path_t2"])
+ModelPusherArtifact = namedtuple("ModelPusherArtifact", ["is_model_pusher", "export_model_file_path"])

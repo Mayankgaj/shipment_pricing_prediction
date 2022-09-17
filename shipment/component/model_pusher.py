@@ -21,28 +21,20 @@ class ModelPusher:
 
     def export_model(self) -> ModelPusherArtifact:
         try:
-            model_file_path_t1 = self.model_trainer_config.trained_model_file_path.replace(".pkl", "_1.pkl")
-            model_file_path_t2 = self.model_trainer_config.trained_model_file_path.replace(".pkl", "_2.pkl")
+            evaluated_model_file_path = self.model_trainer_config.trained_model_file_path
             export_dir = self.model_pusher_config.export_dir_path
-            model_file_name_t1 = "model_1.pkl"
-            model_file_name_t2 = "model_2.pkl"
-            export_model_file_path_t1 = os.path.join(export_dir, model_file_name_t1)
-            export_model_file_path_t2 = os.path.join(export_dir, model_file_name_t2)
-            logging.info(f"Exporting model file: [{export_model_file_path_t1}]")
-            os.makedirs(export_dir, exist_ok=True)
-            logging.info(f"Exporting model file: [{export_model_file_path_t2}]")
+            model_file_name = os.path.basename(evaluated_model_file_path)
+            export_model_file_path = os.path.join(export_dir, model_file_name)
+            logging.info(f"Exporting model file: [{export_model_file_path}]")
             os.makedirs(export_dir, exist_ok=True)
 
-            shutil.copy(src=model_file_path_t1, dst=export_model_file_path_t1)
+            shutil.copy(src=evaluated_model_file_path, dst=export_model_file_path)
+            # we can call a function to save model to Azure blob storage/ google cloud storage / s3 bucket
             logging.info(
-                f"Trained model: {model_file_path_t1} is copied in export dir:[{export_model_file_path_t1}]")
-            shutil.copy(src=model_file_path_t2, dst=export_model_file_path_t2)
-            logging.info(
-                f"Trained model: {model_file_path_t2} is copied in export dir:[{export_model_file_path_t2}]")
+                f"Trained model: {evaluated_model_file_path} is copied in export dir:[{export_model_file_path}]")
 
             model_pusher_artifact = ModelPusherArtifact(is_model_pusher=True,
-                                                        export_model_file_path_t1=export_model_file_path_t1,
-                                                        export_model_file_path_t2=export_model_file_path_t2,
+                                                        export_model_file_path=export_model_file_path
                                                         )
             logging.info(f"Model pusher artifact: [{model_pusher_artifact}]")
             return model_pusher_artifact
