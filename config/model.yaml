@@ -67,3 +67,23 @@ model_selection:
       min_samples_leaf:
         - 2
         - 4
+
+  module_5:
+    class: DecisionTreeRegressor
+    module: sklearn.tree
+    params:
+      criterion: squared_error
+
+    search_param_grid:
+      criterion:
+        - squared_error
+        - absolute_error
+      max_depth:
+        - 2
+        - 5
+      min_samples_split:
+        - 2
+        - 4
+      min_samples_leaf:
+        - 2
+        - 4
