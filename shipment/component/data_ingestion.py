@@ -34,8 +34,9 @@ class DataIngestion:
             logging.info(f"Downloading file from :[https://www.kaggle.com/datasets/{username}/{dataset_name}] "
                          f"into :[{download_path}]")
             api.dataset_download_files(f'{username}/{dataset_name}', path=download_path, unzip=True)
+            src_path = os.path.join(download_path, "SCMS_Delivery_History_Dataset.csv")
             dst_path = os.path.join(ROOT_DIR, "SCMS_Delivery_History_Dataset.csv")
-            shutil.copyfile(src=download_path, dst=dst_path)
+            shutil.copyfile(src=src_path, dst=dst_path)
 
             logging.info(f"File :[{download_path}] has been downloaded successfully.")
             return download_path
