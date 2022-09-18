@@ -1,0 +1,812 @@
+{% extends 'header.html' %}
+
+{% block head %}
+
+
+<title>Shipment Price Estimator</title>
+{% endblock %}
+
+{% block content %}
+<style type="text/css">
+    .form-label {
+        color: white;
+    }
+    legend {
+        color: white;
+    }
+</style>
+<div class="row">
+    <div class="col-md-6 col-sm-12 col-xs-6 col-lg-6">
+
+
+        <form action="/predict" method="post">
+            <legend>Shipment Price Form</legend>
+            <div class="mb-3">
+                <label class="form-label">country</label>
+                <select class="form-control" name="Country" placeholder="Enter Country Name"
+                    required="required">
+                    <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                    <option value="Vietnam">Vietnam</option>
+                    <option value="Nigeria">Nigeria</option>
+                    <option value="Zambia">Zambia</option>
+                    <option value="Tanzania">Tanzania</option>
+                    <option value="Rwanda">Rwanda</option>
+                    <option value="Haiti">Haiti</option>
+                    <option value="Zimbabwe">Zimbabwe</option>
+                    <option value="Ethiopia">Ethiopia</option>
+                    <option value="South Africa">South Africa</option>
+                    <option value="Guyana">Guyana</option>
+                    <option value="Namibia">Namibia</option>
+                    <option value="Botswana">Botswana</option>
+                    <option value="Mozambique">Mozambique</option>
+                    <option value="Kenya">Kenya</option>
+                    <option value="Kazakhstan">Kazakhstan</option>
+                    <option value="Uganda">Uganda</option>
+                    <option value="Kyrgyzstan">Kyrgyzstan</option>
+                    <option value="Senegal">Senegal</option>
+                    <option value="Benin">Benin</option>
+                    <option value="Lesotho">Lesotho</option>
+                    <option value="Pakistan">Pakistan</option>
+                    <option value="Swaziland">Swaziland</option>
+                    <option value="Ghana">Ghana</option>
+
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Managed_By</label>
+                <select class="form-control" name="Managed_By"
+                    required="required">
+                    <option value="PMO - US">PMO - US</option>
+                    <option value="South Africa Field Office">South Africa Field Office</option>
+                    <option value="Haiti Field Office">Haiti Field Office</option>
+                    <option value="Ethiopia Field Office">Ethiopia Field Office</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Fulfill_Via</label>
+                <select class="form-control" name="Fulfill_Via"
+                    required="required">
+                    <option value="Direct Drop">Direct Drop</option>
+                    <option value="From RDC">From RDC</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Vendor_INCO_Term</label>
+                <select class="form-control" name="Vendor_INCO_Term"
+                    required="required">
+                    <option value="EXW">EXW</option>
+                    <option value="FCA">FCA</option>
+                    <option value="DDU">DDU</option>
+                    <option value="CIP">CIP</option>
+                    <option value="DDP">DDP</option>
+                    <option value="CIF">CIF</option>
+                    <option value="N/A - From RDC">N/A - From RDC</option>
+                    <option value="DAP">DAP</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Shipment_Mode</label>
+                <select class="form-control" name="Shipment_Mode"
+                    required="required">
+                    <option value="Air">Air</option>
+                    <option value="Truck">Truck</option>
+                    <option value="Air Charter">Air Charter</option>
+                    <option value="Ocean">Ocean</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="Scheduled_Delivery_Date">Scheduled_Delivery_Date</label>
+                <input class="form-control" type="date" id="Scheduled_Delivery_Date" name="Scheduled_Delivery_Date"
+                    required="required">
+            </div>
+            <div class="mb-3">
+                <label for="Delivered_to_Client_Date">Delivered_to_Client_Date</label>
+                <input class="form-control" type="date" id="Delivered_to_Client_Date" name="Delivered_to_Client_Date"
+                    required="required">
+            </div>
+            <div class="mb-3">
+                <label for="Delivery_Recorded_Date">Delivery_Recorded_Date</label>
+                <input class="form-control" type="date" id="Delivery_Recorded_Date" name="Delivery_Recorded_Date"
+                    required="required">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Product_Group</label>
+                <select class="form-control" name="Product_Group"
+                    required="required">
+                    <option value="HRDT">HRDT</option>
+                    <option value="ARV">ARV</option>
+                    <option value="MRDT">MRDT</option>
+                    <option value="ANTM">ANTM</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Sub_Classification</label>
+                <select class="form-control" name="Sub_Classification"
+                    required="required">
+                    <option value="HIV test">HIV test</option>
+                    <option value="Pediatric">Pediatric</option>
+                    <option value="Adult">Adult</option>
+                    <option value="HIV test - Ancillary">HIV test - Ancillary</option>
+                    <option value="ACT">ACT</option>
+                    <option value="Malaria">Malaria</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Vendor</label>
+                <select class="form-control" name="Vendor"
+                    required="required">
+                    <option value="RANBAXY Fine Chemicals LTD.">RANBAXY Fine Chemicals LTD.</option>
+                    <option value="Aurobindo Pharma Limited">Aurobindo Pharma Limited</option>
+                    <option value="Abbott GmbH & Co. KG">Abbott GmbH & Co. KG</option>
+                    <option value="SUN PHARMACEUTICAL INDUSTRIES LTD (RANBAXY LABORATORIES LIMITED)">SUN PHARMACEUTICAL INDUSTRIES LTD (RANBAXY LABORATORIES LIMITED)</option>
+                    <option value="MERCK SHARP & DOHME IDEA GMBH (FORMALLY MERCK SHARP & DOHME B.V.)">MERCK SHARP & DOHME IDEA GMBH (FORMALLY MERCK SHARP & DOHME B.V.)</option>
+                    <option value="ABBVIE LOGISTICS (FORMERLY ABBOTT LOGISTICS BV)">ABBVIE LOGISTICS (FORMERLY ABBOTT LOGISTICS BV)</option>
+                    <option value="Trinity Biotech, Plc">Trinity Biotech, Plc</option>
+                    <option value="EY Laboratories">EY Laboratories</option>
+                    <option value="CIPLA LIMITED">CIPLA LIMITED</option>
+                    <option value="BRISTOL-MYERS SQUIBB">BRISTOL-MYERS SQUIBB</option>
+                    <option value="ACCOUN NIGERIA LIMITED">ACCOUN NIGERIA LIMITED</option>
+                    <option value="Premier Medical Corporation Ltd.">Premier Medical Corporation Ltd.</option>
+                    <option value="CHEMBIO DIAGNOSTIC SYSTEMS, INC.">CHEMBIO DIAGNOSTIC SYSTEMS, INC.</option>
+                    <option value="Orgenics, Ltd">Orgenics, Ltd</option>
+                    <option value="Orasure Technologies Inc.">Orasure Technologies Inc.</option>
+                    <option value="Standard Diagnostics, Inc.">Standard Diagnostics, Inc.</option>
+                    <option value="JSI R&T INSTITUTE, INC.">JSI R&T INSTITUTE, INC.</option>
+                    <option value="GILEAD SCIENCES IRELAND, INC.">GILEAD SCIENCES IRELAND, INC.</option>
+                    <option value="BIO-RAD LABORATORIES (FRANCE)">BIO-RAD LABORATORIES (FRANCE)</option>
+                    <option value="TURE PHARMACEUTICALS & MEDICAL SUPPLIES P.L.C.">TURE PHARMACEUTICALS & MEDICAL SUPPLIES P.L.C.</option>
+                    <option value="MYLAN LABORATORIES LTD (FORMERLY MATRIX LABORATORIES)">MYLAN LABORATORIES LTD (FORMERLY MATRIX LABORATORIES)</option>
+                    <option value="S. BUYS WHOLESALER">S. BUYS WHOLESALER</option>
+                    <option value="IDA FOUNDATION">IDA FOUNDATION</option>
+                    <option value="ZEPHYR BIOMEDICALS">ZEPHYR BIOMEDICALS</option>
+                    <option value="HETERO LABS LIMITED">HETERO LABS LIMITED</option>
+                    <option value="INTERNATIONAL HEALTHCARE DISTRIBUTORS">INTERNATIONAL HEALTHCARE DISTRIBUTORS</option>
+                    <option value="STRIDES ARCOLAB LIMITED">STRIDES ARCOLAB LIMITED</option>
+                    <option value="ASPEN PHARMACARE">ASPEN PHARMACARE</option>
+                    <option value="SHANGHAI KEHUA BIOENGINEERING CO.,LTD.  (KHB)">SHANGHAI KEHUA BIOENGINEERING CO.,LTD.  (KHB)</option>
+                    <option value="BIOLYTICAL LABORATORIES INC.">BIOLYTICAL LABORATORIES INC.</option>
+                    <option value="INVERNESS MEDICAL INNOVATIONS SOUTH AFRICA (PTY) LTD">INVERNESS MEDICAL INNOVATIONS SOUTH AFRICA (PTY) LTD</option>
+                    <option value="ABBOTT LABORATORIES (PUERTO RICO)">ABBOTT LABORATORIES (PUERTO RICO)</option>
+                    <option value="SUB-SAHARAN BIOMEDICAL P.L.C.">SUB-SAHARAN BIOMEDICAL P.L.C.</option>
+                    <option value="SETEMA LIMITED PLC">SETEMA LIMITED PLC</option>
+                    <option value="GLAXOSMITHKLINE EXPORT LIMITED">GLAXOSMITHKLINE EXPORT LIMITED</option>
+                    <option value="OMEGA DIAGNOSTICS LTD">OMEGA DIAGNOSTICS LTD</option>
+                    <option value="Hoffmann-La Roche ltd Basel">Hoffmann-La Roche ltd Basel</option>
+                    <option value="REINBOLD EXPORT IMPORT">REINBOLD EXPORT IMPORT</option>
+                    <option value="BUNDI INTERNATIONAL DIAGNOSTICS LTD">BUNDI INTERNATIONAL DIAGNOSTICS LTD</option>
+                    <option value="MISSIONPHARMA A/S">MISSIONPHARMA A/S</option>
+                    <option value="PLURIPHARM S.A.">PLURIPHARM S.A.</option>
+                    <option value="CENTRAL PHARMACEUTICAL COMPANY NO. 1">CENTRAL PHARMACEUTICAL COMPANY NO. 1</option>
+                    <option value="AHN (PTY) LTD (AKA UCB (S.A.)">AHN (PTY) LTD (AKA UCB (S.A.)</option>
+                    <option value="KAS MEDICS LIMITED">KAS MEDICS LIMITED</option>
+                    <option value="SCMS from RDC">SCMS from RDC</option>
+                    <option value="PHARMACY DIRECT">PHARMACY DIRECT</option>
+                    <option value="ABBVIE, SRL (FORMALLY ABBOTT LABORATORIES INTERNATIONAL CO.)">ABBVIE, SRL (FORMALLY ABBOTT LABORATORIES INTERNATIONAL CO.)</option>
+                    <option value="EMCURE PHARMACEUTICALS LTD">EMCURE PHARMACEUTICALS LTD</option>
+                    <option value="MICRO LABS LIMITED">MICRO LABS LIMITED</option>
+                    <option value="NOVARTIS PHARMA SERVICES AG">NOVARTIS PHARMA SERVICES AG</option>
+                    <option value="SWORDS LABORATORIES">SWORDS LABORATORIES</option>
+                    <option value="IDIS LIMITED">IDIS LIMITED</option>
+                    <option value="AMSTELFARMA B.V.">AMSTELFARMA B.V.</option>
+                    <option value="LAWRENCE LABORATORIES (SUBSIDIARY OF BRISTOL MYERS SQUIBB)">LAWRENCE LABORATORIES (SUBSIDIARY OF BRISTOL MYERS SQUIBB)</option>
+                    <option value="JANSSEN SCIENCES IRELAND UC (FORMERLY JANSSEN R&D IRELAND)">JANSSEN SCIENCES IRELAND UC (FORMERLY JANSSEN R&D IRELAND)</option>
+                    <option value="INVERNESS MEDICAL INNOVATIONS HONG KONG LTD">INVERNESS MEDICAL INNOVATIONS HONG KONG LTD</option>
+                    <option value="WAGENIA">WAGENIA</option>
+                    <option value="BIO-RAD LABORATORIES PTY LTD. (SOUTH AFRICA)">BIO-RAD LABORATORIES PTY LTD. (SOUTH AFRICA)</option>
+                    <option value="ETHNOR DEL ISTMO S.A.">ETHNOR DEL ISTMO S.A.</option>
+                    <option value="PUETRO RICO PHARMACEUTICAL, INC.">PUETRO RICO PHARMACEUTICAL, INC.</option>
+                    <option value="MSD LATIN AMERICA SERVICES, S. DE R.L. DE C.V.">MSD LATIN AMERICA SERVICES, S. DE R.L. DE C.V.</option>
+                    <option value="ACOUNS NIGERIA LTD">ACOUNS NIGERIA LTD</option>
+                    <option value="IMRES B.V.">IMRES B.V.</option>
+                    <option value="THE MEDICAL EXPORT GROUP BV">THE MEDICAL EXPORT GROUP BV</option>
+                    <option value="ACTION MEDEOR E.V.">ACTION MEDEOR E.V.</option>
+                    <option value="RAININ INSTRUMENT, LLC.">RAININ INSTRUMENT, LLC.</option>
+                    <option value="ACCESS BIO, INC.">ACCESS BIO, INC.</option>
+                    <option value="HUMAN GMBH">HUMAN GMBH</option>
+                    <option value="B&C GROUP S.A.">B&C GROUP S.A.</option>
+                    <option value="SYSMEX AMERICA INC">SYSMEX AMERICA INC</option>
+                    <option value="MEDMIRA EAST AFRICA LTD.">MEDMIRA EAST AFRICA LTD.</option>
+                    <option value="ABBOTT LOGISTICS B.V.">ABBOTT LOGISTICS B.V.</option>
+                    <option value="AUROBINDO PHARAM (SOUTH AFRICA)">AUROBINDO PHARAM (SOUTH AFRICA)</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Item_Description</label>
+                <select class="form-control" name="Item_Description"
+                    required="required">
+                    <option value="HIV, Reveal G3 Rapid HIV-1 Antibody Test, 30 Tests">HIV, Reveal G3 Rapid HIV-1 Antibody Test, 30 Tests</option>
+                    <option value="Nevirapine 10mg/ml, oral suspension, Bottle, 240 ml">Nevirapine 10mg/ml, oral suspension, Bottle, 240 ml</option>
+                    <option value="HIV 1/2, Determine Complete HIV Kit, 100 Tests">HIV 1/2, Determine Complete HIV Kit, 100 Tests</option>
+                    <option value="Lamivudine 150mg, tablets, 60 Tabs">Lamivudine 150mg, tablets, 60 Tabs</option>
+                    <option value="Stavudine 30mg, capsules, 60 Caps">Stavudine 30mg, capsules, 60 Caps</option>
+                    <option value="Zidovudine 10mg/ml, oral solution, Bottle, 240 ml">Zidovudine 10mg/ml, oral solution, Bottle, 240 ml</option>
+                    <option value="Efavirenz 200mg [Stocrin/Sustiva], capsule, 90 Caps">Efavirenz 200mg [Stocrin/Sustiva], capsule, 90 Caps</option>
+                    <option value="Nevirapine 200mg, tablets, 60 Tabs">Nevirapine 200mg, tablets, 60 Tabs</option>
+                    <option value="Lopinavir/Ritonavir 200/50mg [Aluvia], tablets, 120 Tabs">Lopinavir/Ritonavir 200/50mg [Aluvia], tablets, 120 Tabs</option>
+                    <option value="HIV 1/2, Uni-Gold HIV Kit, 20 Tests">HIV 1/2, Uni-Gold HIV Kit, 20 Tests</option>
+                    <option value="HIV 1/2, InstantChek HIV 1+2 Kit, 100 Tests">HIV 1/2, InstantChek HIV 1+2 Kit, 100 Tests</option>
+                    <option value="Lamivudine/Zidovudine 150/300mg, tablets, 60 Tabs">Lamivudine/Zidovudine 150/300mg, tablets, 60 Tabs</option>
+                    <option value="#102198**Didanosine 200mg [Videx], tablets, 60 Tabs">#102198**Didanosine 200mg [Videx], tablets, 60 Tabs</option>
+                    <option value="HIV 1/2/O, First Response HIV 1-2.0, v.3.0 Cards Kit, 30 Tests">HIV 1/2/O, First Response HIV 1-2.0, v.3.0 Cards Kit, 30 Tests</option>
+                    <option value="Didanosine 2g [Videx], powder for oral solution 10mg/ml, reconstitute to 200 ml">Didanosine 2g [Videx], powder for oral solution 10mg/ml, reconstitute to 200 ml</option>
+                    <option value="HIV 1/2, Stat-Pak HIV, Kit, 20 Tests">HIV 1/2, Stat-Pak HIV, Kit, 20 Tests</option>
+                    <option value="HIV 1/2, Determine HIV Kit, without Lancets, 100 Tests">HIV 1/2, Determine HIV Kit, without Lancets, 100 Tests</option>
+                    <option value="HIV 1/2, OraQuick Advance HIV Rapid Antibody Kit, 100 Tests">HIV 1/2, OraQuick Advance HIV Rapid Antibody Kit, 100 Tests</option>
+                    <option value="HIV 1/2, Bioline 3.0 Kit, Lancets, Capillary pipets, Alcohol swabs included, 25 Tests">HIV 1/2, Bioline 3.0 Kit, Lancets, Capillary pipets, Alcohol swabs included, 25 Tests</option>
+                    <option value="Zidovudine 10mg/ml [Retrovir], oral solution, Bottle, 200 ml">Zidovudine 10mg/ml [Retrovir], oral solution, Bottle, 200 ml</option>
+                    <option value="Tenofovir Disoproxil Fumarate 300mg [Viread], tablets, 30 Tabs">Tenofovir Disoproxil Fumarate 300mg [Viread], tablets, 30 Tabs</option>
+                    <option value="Zidovudine 300mg, tablets, 60 Tabs">Zidovudine 300mg, tablets, 60 Tabs</option>
+                    <option value="HIV, Lancet, Safety, for HIV Test kits, 100 Pcs">HIV, Lancet, Safety, for HIV Test kits, 100 Pcs</option>
+                    <option value="Stavudine 1mg/ml [Zerit], powder for oral solution, Bottle, 200 ml">Stavudine 1mg/ml [Zerit], powder for oral solution, Bottle, 200 ml</option>
+                    <option value="HIV 1/2, Capillus HIV Kit, 100 Tests">HIV 1/2, Capillus HIV Kit, 100 Tests</option>
+                    <option value="#108853** HIV, Genie II HIV-1/HIV-2 Kit, 40 Tests">#108853** HIV, Genie II HIV-1/HIV-2 Kit, 40 Tests</option>
+                    <option value="Efavirenz 600mg, tablets, 30 Tabs">Efavirenz 600mg, tablets, 30 Tabs</option>
+                    <option value="Saquinavir 200mg [Invirase], capsules, 270 Caps">Saquinavir 200mg [Invirase], capsules, 270 Caps</option>
+                    <option value="Didanosine 25mg [Videx], chewable tablets, 60 Tabs">Didanosine 25mg [Videx], chewable tablets, 60 Tabs</option>
+                    <option value="Tenofovir Disoproxil Fumarate 300mg, tablets, 30 Tabs">Tenofovir Disoproxil Fumarate 300mg, tablets, 30 Tabs</option>
+                    <option value="Stavudine 20mg [Zerit], capsules, 60 Caps">Stavudine 20mg [Zerit], capsules, 60 Caps</option>
+                    <option value="Didanosine EC 250mg [Videx EC], delayed-release capsules, Blister 3 x 10 Caps">Didanosine EC 250mg [Videx EC], delayed-release capsules, Blister 3 x 10 Caps</option>
+                    <option value="Didanosine EC 400mg [Videx EC], delayed-release capsules, Blister 3 x 10 Caps">Didanosine EC 400mg [Videx EC], delayed-release capsules, Blister 3 x 10 Caps</option>
+                    <option value="Abacavir 300mg [Ziagen], tablets, Blister 6 x 10 Tabs">Abacavir 300mg [Ziagen], tablets, Blister 6 x 10 Tabs</option>
+                    <option value="Artemether/Lumefantrine 20/120mg [Coartem], scored tablets, Blister 30 x 18 Tabs">Artemether/Lumefantrine 20/120mg [Coartem], scored tablets, Blister 30 x 18 Tabs</option>
+                    <option value="Nevirapine 10mg/ml [Viramune], oral suspension, Bottle, 240 ml">Nevirapine 10mg/ml [Viramune], oral suspension, Bottle, 240 ml</option>
+                    <option value="Malaria Paramax-3 Kit, 25 Tests">Malaria Paramax-3 Kit, 25 Tests</option>
+                    <option value="Artesunate+Amodiaquine 50+153mg, tablets, co-blister 6+6 Tabs">Artesunate+Amodiaquine 50+153mg, tablets, co-blister 6+6 Tabs</option>
+                    <option value="Efavirenz/Emtricitabine/Tenofovir Disoproxil Fumarate 600/200/300mg [Atripla], tablets, 30 Tabs">Efavirenz/Emtricitabine/Tenofovir Disoproxil Fumarate 600/200/300mg [Atripla], tablets, 30 Tabs</option>
+                    <option value="#109436**HIV 1, Uni-Gold Recombigen HIV Control, Vial 2 x 0.5 ml">#109436**HIV 1, Uni-Gold Recombigen HIV Control, Vial 2 x 0.5 ml</option>
+                    <option value="Didanosine 100mg [Videx],chewable tablets, 60 Tabs">Didanosine 100mg [Videx],chewable tablets, 60 Tabs</option>
+                    <option value="Lopinavir/Ritonavir 80/20mg/ml [Kaletra], oral solution, cool, Bottle 5 x 60 ml">Lopinavir/Ritonavir 80/20mg/ml [Kaletra], oral solution, cool, Bottle 5 x 60 ml</option>
+                    <option value="Quinine 600mg/2ml (as dihydrochloride), injection, 2ml x 100 Ampules">Quinine 600mg/2ml (as dihydrochloride), injection, 2ml x 100 Ampules</option>
+                    <option value="Lamivudine/Nevirapine/Stavudine 150/200/30mg, tablets, 60 Tabs">Lamivudine/Nevirapine/Stavudine 150/200/30mg, tablets, 60 Tabs</option>
+                    <option value="Lopinavir/Ritonavir 100/25mg [Aluvia], tablets, 60 Tabs">Lopinavir/Ritonavir 100/25mg [Aluvia], tablets, 60 Tabs</option>
+                    <option value="Didanosine 50mg [Videx], chewable tablets, 60 Tabs">Didanosine 50mg [Videx], chewable tablets, 60 Tabs</option>
+                    <option value="Lamivudine 10mg/ml [Epivir], oral solution, Bottle, 240 ml">Lamivudine 10mg/ml [Epivir], oral solution, Bottle, 240 ml</option>
+                    <option value="Lamivudine 10mg/ml, oral solution, Bottle, 240 ml">Lamivudine 10mg/ml, oral solution, Bottle, 240 ml</option>
+                    <option value="Efavirenz 50mg, capsule, 30 Caps">Efavirenz 50mg, capsule, 30 Caps</option>
+                    <option value="Stavudine 15mg [Zerit], capsules, 60 Caps">Stavudine 15mg [Zerit], capsules, 60 Caps</option>
+                    <option value="Zidovudine 300mg [Retrovir], tablets, 60 Tabs">Zidovudine 300mg [Retrovir], tablets, 60 Tabs</option>
+                    <option value="Ritonavir 100mg [Norvir], capsules, cool, 4 x 84 Caps">Ritonavir 100mg [Norvir], capsules, cool, 4 x 84 Caps</option>
+                    <option value="Emtricitabine/Tenofovir Disoproxil Fumarate 200/300mg [Truvada], tablets, 30 Tabs">Emtricitabine/Tenofovir Disoproxil Fumarate 200/300mg [Truvada], tablets, 30 Tabs</option>
+                    <option value="Lamivudine/Nevirapine/Zidovudine 150/200/300mg, tablets, 60 Tabs">Lamivudine/Nevirapine/Zidovudine 150/200/300mg, tablets, 60 Tabs</option>
+                    <option value="HIV 1/2, Clearview Complete Kit, 25 Tests">HIV 1/2, Clearview Complete Kit, 25 Tests</option>
+                    <option value="Ritonavir 100mg [Norvir], capsules, cool, 84 Caps">Ritonavir 100mg [Norvir], capsules, cool, 84 Caps</option>
+                    <option value="Lopinavir/Ritonavir 133.3/33.3mg [Kaletra], capsules, cool, 2 x 90 Caps">Lopinavir/Ritonavir 133.3/33.3mg [Kaletra], capsules, cool, 2 x 90 Caps</option>
+                    <option value="Abacavir 300mg, tablets, 60 Tabs">Abacavir 300mg, tablets, 60 Tabs</option>
+                    <option value="Stavudine 20mg, capsules, 60 Caps">Stavudine 20mg, capsules, 60 Caps</option>
+                    <option value="Ritonavir 80mg/ml [Norvir], oral solution, cool, Bottle, 90 ml">Ritonavir 80mg/ml [Norvir], oral solution, cool, Bottle, 90 ml</option>
+                    <option value="Lamivudine 150mg [Epivir], tablets, 60 Tabs">Lamivudine 150mg [Epivir], tablets, 60 Tabs</option>
+                    <option value="Efavirenz 50mg [Stocrin/Sustiva], capsule, 30 Caps">Efavirenz 50mg [Stocrin/Sustiva], capsule, 30 Caps</option>
+                    <option value="HIV 1/2, SKB Colloidal Gold, Diagnostic Kit, Antibody, 50 Tests">HIV 1/2, SKB Colloidal Gold, Diagnostic Kit, Antibody, 50 Tests</option>
+                    <option value="#109440**HIV 1/2, INSTI HIV Antibody Individual POC, 1 Test">#109440**HIV 1/2, INSTI HIV Antibody Individual POC, 1 Test</option>
+                    <option value="Zidovudine 100mg, capsules, 100 Caps">Zidovudine 100mg, capsules, 100 Caps</option>
+                    <option value="Efavirenz 200mg, capsule, 90 Caps">Efavirenz 200mg, capsule, 90 Caps</option>
+                    <option value="Nevirapine 200mg [Viramune], tablets, 60 Tabs">Nevirapine 200mg [Viramune], tablets, 60 Tabs</option>
+                    <option value="Zidovudine 10mg/ml [Retrovir], solution for IV infusion injection, Vial 5 x 20 ml">Zidovudine 10mg/ml [Retrovir], solution for IV infusion injection, Vial 5 x 20 ml</option>
+                    <option value="Didanosine 250mg, delayed-release capsules, 30 Caps">Didanosine 250mg, delayed-release capsules, 30 Caps</option>
+                    <option value="Lamivudine/Stavudine 30/6mg, dispersible tablets, 60 Tabs">Lamivudine/Stavudine 30/6mg, dispersible tablets, 60 Tabs</option>
+                    <option value="Abacavir 20mg/ml, oral solution, Bottle, 240 ml">Abacavir 20mg/ml, oral solution, Bottle, 240 ml</option>
+                    <option value="Stavudine 40mg, capsules, 60 Caps">Stavudine 40mg, capsules, 60 Caps</option>
+                    <option value="Stavudine 15mg, capsules, 60 Caps">Stavudine 15mg, capsules, 60 Caps</option>
+                    <option value="Efavirenz 600mg [Stocrin/Sustiva], tablets, 30 Tabs">Efavirenz 600mg [Stocrin/Sustiva], tablets, 30 Tabs</option>
+                    <option value="Stavudine 30mg [Zerit], capsules, 60 Caps">Stavudine 30mg [Zerit], capsules, 60 Caps</option>
+                    <option value="Stavudine 40mg [Zerit], capsules, 60 Caps">Stavudine 40mg [Zerit], capsules, 60 Caps</option>
+                    <option value="Stavudine 1mg/ml, powder for oral solution, 200 ml">Stavudine 1mg/ml, powder for oral solution, 200 ml</option>
+                    <option value="Zidovudine 100mg [Retrovir], capsules, 100 Caps">Zidovudine 100mg [Retrovir], capsules, 100 Caps</option>
+                    <option value="Abacavir/Lamivudine/Zidovudine 300/150/300mg [Trizivir], tablets, 60 Tabs">Abacavir/Lamivudine/Zidovudine 300/150/300mg [Trizivir], tablets, 60 Tabs</option>
+                    <option value="HIV 1/2, Visitect Kit, 25 Tests">HIV 1/2, Visitect Kit, 25 Tests</option>
+                    <option value="Nelfinavir (as mesilate) 250mg [Viracept], tablets, 270 Tabs">Nelfinavir (as mesilate) 250mg [Viracept], tablets, 270 Tabs</option>
+                    <option value="HIV 1/2, DoubleCheck II Kit, 40 Tests">HIV 1/2, DoubleCheck II Kit, 40 Tests</option>
+                    <option value="Didanosine 100mg, chewable/dispersible tablets, 60 Tabs">Didanosine 100mg, chewable/dispersible tablets, 60 Tabs</option>
+                    <option value="HIV 1/2, Bundi Rapid HIV Kit, 25 Tests">HIV 1/2, Bundi Rapid HIV Kit, 25 Tests</option>
+                    <option value="Capillary Tubes, for Determine, EDTA, 50uL,100 Pcs">Capillary Tubes, for Determine, EDTA, 50uL,100 Pcs</option>
+                    <option value="HIV 1/2, ImmunoComb TriSpot Ag - Ab Kit, 36 Tests">HIV 1/2, ImmunoComb TriSpot Ag - Ab Kit, 36 Tests</option>
+                    <option value="HIV 1/2, Bioline 3.0 Kit, (no accessories), 30 Tests">HIV 1/2, Bioline 3.0 Kit, (no accessories), 30 Tests</option>
+                    <option value="Abacavir 20mg/ml [Ziagen], oral solution, Bottle, 240 ml">Abacavir 20mg/ml [Ziagen], oral solution, Bottle, 240 ml</option>
+                    <option value="Sulfadoxine/Pyrimethamine 500/25mg, tablets, 1000 Tabs">Sulfadoxine/Pyrimethamine 500/25mg, tablets, 1000 Tabs</option>
+                    <option value="Chloroquine 150mg base (as phosphate), [DON] tablets, 1000 Tabs">Chloroquine 150mg base (as phosphate), [DON] tablets, 1000 Tabs</option>
+                    <option value="Quinine 300mg (as sulfate), tablets, Blister 100 x 10 Tabs">Quinine 300mg (as sulfate), tablets, Blister 100 x 10 Tabs</option>
+                    <option value="Artesunate+Amodiaquine 50+153mg, tablets, co-blister 12+12 Tabs">Artesunate+Amodiaquine 50+153mg, tablets, co-blister 12+12 Tabs</option>
+                    <option value="Didanosine 200mg, chewable/dispersible tablets, 60 Tabs">Didanosine 200mg, chewable/dispersible tablets, 60 Tabs</option>
+                    <option value="Lamivudine/Nevirapine/Stavudine 30/50/6mg, dispersible tablets, 60 Tabs">Lamivudine/Nevirapine/Stavudine 30/50/6mg, dispersible tablets, 60 Tabs</option>
+                    <option value="Indinavir 400mg [Crixivan], capsules, 180 Caps">Indinavir 400mg [Crixivan], capsules, 180 Caps</option>
+                    <option value="Lamivudine/Zidovudine+Nevirapine 150/300+200mg, tablets, co-blister, 60+60 Tabs">Lamivudine/Zidovudine+Nevirapine 150/300+200mg, tablets, co-blister, 60+60 Tabs</option>
+                    <option value="#109435**HIV, OraQuick Controls Kit, 3 Vials">#109435**HIV, OraQuick Controls Kit, 3 Vials</option>
+                    <option value="Primaquine 15mg base (as diphosphate), tablets, 1000 Tabs">Primaquine 15mg base (as diphosphate), tablets, 1000 Tabs</option>
+                    <option value="Lamivudine/Stavudine 150/30mg, tablets, 30 Tabs">Lamivudine/Stavudine 150/30mg, tablets, 30 Tabs</option>
+                    <option value="Lamivudine/Nevirapine/Stavudine 150/200/40mg, tablets, 60 Tabs">Lamivudine/Nevirapine/Stavudine 150/200/40mg, tablets, 60 Tabs</option>
+                    <option value="HIV 2, New LAV Blot 2 HIV Kit, 18 Tests">HIV 2, New LAV Blot 2 HIV Kit, 18 Tests</option>
+                    <option value="HIV, Bioline HIV 1/2 3.0 Kit, [DON] 25 Tests">HIV, Bioline HIV 1/2 3.0 Kit, [DON] 25 Tests</option>
+                    <option value="Efavirenz 30mg/ml [Stocrin/Sustiva], oral solution, Bottle, 180 ml">Efavirenz 30mg/ml [Stocrin/Sustiva], oral solution, Bottle, 180 ml</option>
+                    <option value="Abacavir 20mg/ml, [DON] oral solution, Bottle, 240 ml">Abacavir 20mg/ml, [DON] oral solution, Bottle, 240 ml</option>
+                    <option value="Lamivudine/Stavudine 150/30mg, tablets, 60 Tabs">Lamivudine/Stavudine 150/30mg, tablets, 60 Tabs</option>
+                    <option value="Emtricitabine/Tenofovir Disoproxil Fumarate 200/300mg, tablets, 30 Tabs">Emtricitabine/Tenofovir Disoproxil Fumarate 200/300mg, tablets, 30 Tabs</option>
+                    <option value="Lamivudine/Zidovudine+Abacavir 150/300+300mg, tablets, co-blister, 60+60 Tabs">Lamivudine/Zidovudine+Abacavir 150/300+300mg, tablets, co-blister, 60+60 Tabs</option>
+                    <option value="Lamivudine/Tenofovir Disoproxil Fumarate 300/300mg, tablets, 30 Tabs">Lamivudine/Tenofovir Disoproxil Fumarate 300/300mg, tablets, 30 Tabs</option>
+                    <option value="Lamivudine/Nevirapine/Stavudine 60/100/12mg, dispersible tablets, 60 Tabs">Lamivudine/Nevirapine/Stavudine 60/100/12mg, dispersible tablets, 60 Tabs</option>
+                    <option value="HIV, Pepti-LAV 1|2 (HIV-1|2 Ab differenciation, Immuno-Blot)">HIV, Pepti-LAV 1|2 (HIV-1|2 Ab differenciation, Immuno-Blot)</option>
+                    <option value="Ritonavir 100mg [Norvir], film coated tablets, 60 Tabs">Ritonavir 100mg [Norvir], film coated tablets, 60 Tabs</option>
+                    <option value="HIV 1/2, Stat-Pak Dipstick Assay Kit, 30 Tests">HIV 1/2, Stat-Pak Dipstick Assay Kit, 30 Tests</option>
+                    <option value="Malaria Antigen P.f Kit, 30 x 1 Test">Malaria Antigen P.f Kit, 30 x 1 Test</option>
+                    <option value="Efavirenz/Lamivudine/Tenofovir Disoproxil Fumarate 600/300/300mg, tablets, 30 Tabs">Efavirenz/Lamivudine/Tenofovir Disoproxil Fumarate 600/300/300mg, tablets, 30 Tabs</option>
+                    <option value="Lopinavir/Ritonavir 80/20mg/ml [Kaletra], oral solution, cool, Bottle, 160 ml">Lopinavir/Ritonavir 80/20mg/ml [Kaletra], oral solution, cool, Bottle, 160 ml</option>
+                    <option value="Etravirine 100mg [Intelence], tablets, 120 Tabs">Etravirine 100mg [Intelence], tablets, 120 Tabs</option>
+                    <option value="HIV 1/2, Bioline 3.0 Diluent, 25 Tests, Bottle x 5 ml">HIV 1/2, Bioline 3.0 Diluent, 25 Tests, Bottle x 5 ml</option>
+                    <option value="Zidovudine 10mg/ml, oral solution w/syringe, Bottle, 240 ml">Zidovudine 10mg/ml, oral solution w/syringe, Bottle, 240 ml</option>
+                    <option value="Ritonavir 100mg [Norvir], film coated tablets, 30 Tabs">Ritonavir 100mg [Norvir], film coated tablets, 30 Tabs</option>
+                    <option value="Atazanavir/Ritonavir 300/100mg, tablets, 30 Tabs">Atazanavir/Ritonavir 300/100mg, tablets, 30 Tabs</option>
+                    <option value="Nevirapine 50mg, dispersible tablets (tablets for oral suspension), 30 Tabs">Nevirapine 50mg, dispersible tablets (tablets for oral suspension), 30 Tabs</option>
+                    <option value="Darunavir 600mg [Prezista], tablets, 60 Tabs">Darunavir 600mg [Prezista], tablets, 60 Tabs</option>
+                    <option value="HIV 1/2, Determine Kit without Lancets, Buffer or Caplillary Tubes, 100 Tests">HIV 1/2, Determine Kit without Lancets, Buffer or Caplillary Tubes, 100 Tests</option>
+                    <option value="HIV 1/2, OraQuick Rapid Antibody Kit, 100 Tests">HIV 1/2, OraQuick Rapid Antibody Kit, 100 Tests</option>
+                    <option value="Lamivudine/Zidovudine 30/60mg, dispersible tablets, 60 Tabs">Lamivudine/Zidovudine 30/60mg, dispersible tablets, 60 Tabs</option>
+                    <option value="Abacavir/Lamivudine/Zidovudine 300/150/300mg, tablets, 60 Tabs">Abacavir/Lamivudine/Zidovudine 300/150/300mg, tablets, 60 Tabs</option>
+                    <option value="Nevirapine 10mg/ml, oral suspension w/syringe, Bottle, 240 ml">Nevirapine 10mg/ml, oral suspension w/syringe, Bottle, 240 ml</option>
+                    <option value="HIV 1/2, Bioline 3.0 Kit, 100 Tests">HIV 1/2, Bioline 3.0 Kit, 100 Tests</option>
+                    <option value="Artemether/Lumefantrine 20/120mg [Coartem], scored tablets, Blister 30 x 24 Tabs">Artemether/Lumefantrine 20/120mg [Coartem], scored tablets, Blister 30 x 24 Tabs</option>
+                    <option value="Raltegravir 400mg [Isentress], tablets, 60 Tabs">Raltegravir 400mg [Isentress], tablets, 60 Tabs</option>
+                    <option value="Lamivudine 10mg/ml, oral solution w/syringe, Bottle, 240 ml">Lamivudine 10mg/ml, oral solution w/syringe, Bottle, 240 ml</option>
+                    <option value="Lamivudine/Zidovudine 30/60mg, tablets, 60 Tabs">Lamivudine/Zidovudine 30/60mg, tablets, 60 Tabs</option>
+                    <option value="Efavirenz/Emtricitabine/Tenofovir Disoproxil Fumarate 600/200/300mg, tablets, 30 Tabs">Efavirenz/Emtricitabine/Tenofovir Disoproxil Fumarate 600/200/300mg, tablets, 30 Tabs</option>
+                    <option value="Atazanavir 200mg [Reyataz], capsules, 60 Caps">Atazanavir 200mg [Reyataz], capsules, 60 Caps</option>
+                    <option value="Didanosine 400mg, delayed-release capsules, 30 Caps">Didanosine 400mg, delayed-release capsules, 30 Caps</option>
+                    <option value="Lopinavir/Ritonavir 200/50mg, tablets, 120 Tabs">Lopinavir/Ritonavir 200/50mg, tablets, 120 Tabs</option>
+                    <option value="Chase Buffer, Determine, 100 Tests, 2.5ml x 1 Vial">Chase Buffer, Determine, 100 Tests, 2.5ml x 1 Vial</option>
+                    <option value="Mefloquine 250mg (as hydrochloride), tablets, 100 Tabs">Mefloquine 250mg (as hydrochloride), tablets, 100 Tabs</option>
+                    <option value="Abacavir/Lamivudine 60/30mg, tablets, 60 Tabs">Abacavir/Lamivudine 60/30mg, tablets, 60 Tabs</option>
+                    <option value="Darunavir 300mg [Prezista], tablets, 120 Tabs">Darunavir 300mg [Prezista], tablets, 120 Tabs</option>
+                    <option value="Lamivudine/Nevirapine/Zidovudine 30/50/60mg, dispersible tablets, 60 Tabs">Lamivudine/Nevirapine/Zidovudine 30/50/60mg, dispersible tablets, 60 Tabs</option>
+                    <option value="Saquinavir 500mg [Invirase], tablets, 120 Tabs">Saquinavir 500mg [Invirase], tablets, 120 Tabs</option>
+                    <option value="Efavirenz 200mg, scored tablets, 90 Tabs">Efavirenz 200mg, scored tablets, 90 Tabs</option>
+                    <option value="Atazanavir 150mg, capsules, 60 Caps">Atazanavir 150mg, capsules, 60 Caps</option>
+                    <option value="Atazanavir 150mg [Reyataz], capsules, 60 Caps">Atazanavir 150mg [Reyataz], capsules, 60 Caps</option>
+                    <option value="Abacavir 20mg/ml, oral solution w/syringe, Bottle, 240 ml">Abacavir 20mg/ml, oral solution w/syringe, Bottle, 240 ml</option>
+                    <option value="Nevirapine 10mg/ml, oral suspension w/syringe, Bottle, 100 ml">Nevirapine 10mg/ml, oral suspension w/syringe, Bottle, 100 ml</option>
+                    <option value="Didanosine 200mg, delayed-release capsules, 30 Caps">Didanosine 200mg, delayed-release capsules, 30 Caps</option>
+                    <option value="Didanosine 125mg, delayed-release capsules, 30 Caps">Didanosine 125mg, delayed-release capsules, 30 Caps</option>
+                    <option value="Atazanavir 200mg, capsules, 60 Caps">Atazanavir 200mg, capsules, 60 Caps</option>
+                    <option value="Lamivudine/Zidovudine 150/300mg [Combivir], tablets, 60 Tabs">Lamivudine/Zidovudine 150/300mg [Combivir], tablets, 60 Tabs</option>
+                    <option value="Sulfadoxine/Pyrimethamine 500/25mg, tablets, Blister 10 x 3 Tabs">Sulfadoxine/Pyrimethamine 500/25mg, tablets, Blister 10 x 3 Tabs</option>
+                    <option value="Abacavir/Lamivudine 600/300mg, tablets, 30 Tabs">Abacavir/Lamivudine 600/300mg, tablets, 30 Tabs</option>
+                    <option value="Ritonavir 100mg [Norvir], capsules, cool, 2 x 84 Caps">Ritonavir 100mg [Norvir], capsules, cool, 2 x 84 Caps</option>
+                    <option value="Abacavir 60mg, dispersible tablets, 60 Tabs">Abacavir 60mg, dispersible tablets, 60 Tabs</option>
+                    <option value="Lopinavir/Ritonavir 100/25mg, tablets, 60 Tabs">Lopinavir/Ritonavir 100/25mg, tablets, 60 Tabs</option>
+                    <option value="HIV 1/2, Genie III Kit, 50 Tests">HIV 1/2, Genie III Kit, 50 Tests</option>
+                    <option value="Abacavir/Lamivudine 60/30mg, dispersible tablets, 60 Tabs">Abacavir/Lamivudine 60/30mg, dispersible tablets, 60 Tabs</option>
+                    <option value="HIV 1/2, ImmunoComb II BiSpot EIA Kit, 36 Tests">HIV 1/2, ImmunoComb II BiSpot EIA Kit, 36 Tests</option>
+                    <option value="Atazanavir 300mg, capsules, 30 Caps">Atazanavir 300mg, capsules, 30 Caps</option>
+                    <option value="HIV 1/2, DoubleCheck Gold Kit, 20 Tests">HIV 1/2, DoubleCheck Gold Kit, 20 Tests</option>
+                    <option value="HIV, OraQuick Controls Kit, 3 Vials">HIV, OraQuick Controls Kit, 3 Vials</option>
+                    <option value="Abacavir/Lamivudine 600/300mg, scored tablets, 30 Tabs">Abacavir/Lamivudine 600/300mg, scored tablets, 30 Tabs</option>
+                    <option value="HIV, Multispot HIV-1/HIV-2 Rapid Test Kit, 50 Tests">HIV, Multispot HIV-1/HIV-2 Rapid Test Kit, 50 Tests</option>
+                    <option value="Chloroquine 150mg base (as phosphate), tablets, 1000 Tabs">Chloroquine 150mg base (as phosphate), tablets, 1000 Tabs</option>
+                    <option value="HIV 1/2, SKB Colloidal Gold, Diagnostic Kit Set, (includes lancet, transfer pipette & alcohol prep pad), 50 Tests">HIV 1/2, SKB Colloidal Gold, Diagnostic Kit Set, (includes lancet, transfer pipette & alcohol prep pad), 50 Tests</option>
+                    <option value="Lamivudine 300mg, tablets, 30 Tabs">Lamivudine 300mg, tablets, 30 Tabs</option>
+                    <option value="HIV 1/2, Stat-Pak Buffer Only, 20 Tests">HIV 1/2, Stat-Pak Buffer Only, 20 Tests</option>
+                    <option value="HIV 1/2, INSTI HIV 1/2 Antibody Kit, 48 Tests">HIV 1/2, INSTI HIV 1/2 Antibody Kit, 48 Tests</option>
+                    <option value="Lamivudine/Stavudine 60/12mg, dispersible tablets, 60 Tabs">Lamivudine/Stavudine 60/12mg, dispersible tablets, 60 Tabs</option>
+                    <option value="Lamivudine/Zidovudine+Efavirenz 150/300mg+600mg, tablets, co-blister 60+30 Tabs">Lamivudine/Zidovudine+Efavirenz 150/300mg+600mg, tablets, co-blister 60+30 Tabs</option>
+                    <option value="Nevirapine 50mg, dispersible tablets, 60 Tabs">Nevirapine 50mg, dispersible tablets, 60 Tabs</option>
+                    <option value="Malaria, Antigen P.f., HRP2 CareStart Kit, 60 Tests">Malaria, Antigen P.f., HRP2 CareStart Kit, 60 Tests</option>
+                    <option value="HIV 1/2, HEXAGON Rapid HIV Kit, 100 Tests">HIV 1/2, HEXAGON Rapid HIV Kit, 100 Tests</option>
+                    <option value="Stavudine 1mg/ml, powder for oral solution w/syringe, 200 ml">Stavudine 1mg/ml, powder for oral solution w/syringe, 200 ml</option>
+                    <option value="Quinine sulphate 300mg, film coated tablet, 1000 Tabs">Quinine sulphate 300mg, film coated tablet, 1000 Tabs</option>
+                    <option value="Efavirenz 200mg, tablets, 30 Tabs">Efavirenz 200mg, tablets, 30 Tabs</option>
+                    <option value="HIV 1/2, INSTI HIV Antibody Individual POC, 1 Test">HIV 1/2, INSTI HIV Antibody Individual POC, 1 Test</option>
+                    <option value="Malaria Antigen P.f , HRP2, Kit, 25 Tests">Malaria Antigen P.f , HRP2, Kit, 25 Tests</option>
+                    <option value="Nelfinavir 50mg/g [Viracept], oral powder, 144g">Nelfinavir 50mg/g [Viracept], oral powder, 144g</option>
+                    <option value="Lamivudine/Nevirapine/Zidovudine 30/50/60mg, [DON] dispersible tablets, 60 Tabs">Lamivudine/Nevirapine/Zidovudine 30/50/60mg, [DON] dispersible tablets, 60 Tabs</option>
+                    <option value="Abacavir/Lamivudine 60/30mg, tablets, 30 Tabs">Abacavir/Lamivudine 60/30mg, tablets, 30 Tabs</option>
+                    <option value="Didanosine 200mg, [DON] delayed-release capsules, 30 Caps">Didanosine 200mg, [DON] delayed-release capsules, 30 Caps</option>
+                    <option value="Lopinavir/Ritonavir 200/50mg, [DON] tablets, 120 Tabs">Lopinavir/Ritonavir 200/50mg, [DON] tablets, 120 Tabs</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Molecule_Test_Type</label>
+                <select class="form-control" name="Molecule_Test_Type"
+                    required="required">
+                    <option value="HIV, Reveal G3 Rapid HIV-1 Antibody Test">HIV, Reveal G3 Rapid HIV-1 Antibody Test</option><option value="Nevirapine">Nevirapine</option>
+                    <option value="HIV 1/2, Determine Complete HIV Kit">HIV 1/2, Determine Complete HIV Kit</option>
+                    <option value="Lamivudine">Lamivudine</option>
+                    <option value="Stavudine">Stavudine</option>
+                    <option value="Zidovudine">Zidovudine</option>
+                    <option value="Efavirenz">Efavirenz</option>
+                    <option value="Lopinavir/Ritonavir">Lopinavir/Ritonavir</option>
+                    <option value="HIV 1/2, Uni-Gold HIV Kit">HIV 1/2, Uni-Gold HIV Kit</option>
+                    <option value="HIV 1/2, InstantChek HIV 1+2 Kit">HIV 1/2, InstantChek HIV 1+2 Kit</option>
+                    <option value="Lamivudine/Zidovudine">Lamivudine/Zidovudine</option>
+                    <option value="Didanosine">Didanosine</option>
+                    <option value="HIV 1/2/O, First Response HIV 1-2.0, v.3.0 Cards Kit">HIV 1/2/O, First Response HIV 1-2.0, v.3.0 Cards Kit</option>
+                    <option value="HIV 1/2, Stat-Pak HIV, Kit">HIV 1/2, Stat-Pak HIV, Kit</option>
+                    <option value="HIV 1/2, Determine HIV Kit, without Lancets">HIV 1/2, Determine HIV Kit, without Lancets</option>
+                    <option value="HIV 1/2, OraQuick Advance HIV Rapid Antibody Kit">HIV 1/2, OraQuick Advance HIV Rapid Antibody Kit</option>
+                    <option value="HIV 1/2, Bioline 3.0 Kit, Lancets, Capillary pipets, Alcohol swabs included">HIV 1/2, Bioline 3.0 Kit, Lancets, Capillary pipets, Alcohol swabs included</option>
+                    <option value="Tenofovir Disoproxil Fumarate">Tenofovir Disoproxil Fumarate</option>
+                    <option value="HIV, Lancet, Safety, for HIV Test kits, 100 Pcs">HIV, Lancet, Safety, for HIV Test kits, 100 Pcs</option>
+                    <option value="HIV 1/2, Capillus HIV Kit">HIV 1/2, Capillus HIV Kit</option>
+                    <option value="HIV, Genie II HIV-1/HIV-2 Kit">HIV, Genie II HIV-1/HIV-2 Kit</option>
+                    <option value="Saquinavir">Saquinavir</option>
+                    <option value="Didanosine EC">Didanosine EC</option>
+                    <option value="Abacavir">Abacavir</option>
+                    <option value="Artemether/Lumefantrine">Artemether/Lumefantrine</option>
+                    <option value="Malaria Paramax-3 Kit">Malaria Paramax-3 Kit</option>
+                    <option value="Artesunate+Amodiaquine">Artesunate+Amodiaquine</option>
+                    <option value="Efavirenz/Emtricitabine/Tenofovir Disoproxil Fumarate">Efavirenz/Emtricitabine/Tenofovir Disoproxil Fumarate</option>
+                    <option value="HIV 1, Uni-Gold Recombigen HIV Control, Vial 2 x 0.5 ml">HIV 1, Uni-Gold Recombigen HIV Control, Vial 2 x 0.5 ml</option>
+                    <option value="Quinine (as dihydrochloride)">Quinine (as dihydrochloride)</option>
+                    <option value="Lamivudine/Nevirapine/Stavudine">Lamivudine/Nevirapine/Stavudine</option>
+                    <option value="Ritonavir">Ritonavir</option>
+                    <option value="Emtricitabine/Tenofovir Disoproxil Fumarate">Emtricitabine/Tenofovir Disoproxil Fumarate</option>
+                    <option value="Lamivudine/Nevirapine/Zidovudine">Lamivudine/Nevirapine/Zidovudine</option>
+                    <option value="HIV 1/2, Clearview Complete Kit">HIV 1/2, Clearview Complete Kit</option>
+                    <option value="HIV 1/2, Colloidal Gold, Diagnostic Kit, Antibody">HIV 1/2, Colloidal Gold, Diagnostic Kit, Antibody</option>
+                    <option value="HIV 1/2, INSTI HIV Antibody Individual POC, 1 Test">HIV 1/2, INSTI HIV Antibody Individual POC, 1 Test</option>
+                    <option value="Lamivudine/Stavudine">Lamivudine/Stavudine</option>
+                    <option value="Abacavir/Lamivudine/Zidovudine">Abacavir/Lamivudine/Zidovudine</option>
+                    <option value="HIV 1/2, Visitect Kit">HIV 1/2, Visitect Kit</option>
+                    <option value="Nelfinavir (as mesilate)">Nelfinavir (as mesilate)</option>
+                    <option value="HIV 1/2, DoubleCheck II Kit">HIV 1/2, DoubleCheck II Kit</option>
+                    <option value="HIV 1/2, Bundi Rapid HIV Kit">HIV 1/2, Bundi Rapid HIV Kit</option>
+                    <option value="HIV, Capillary Tubes, for Determine, EDTA, 50uL,100 Pcs">HIV, Capillary Tubes, for Determine, EDTA, 50uL,100 Pcs</option>
+                    <option value="HIV 1/2, ImmunoComb TriSpot Ag - Ab Kit">HIV 1/2, ImmunoComb TriSpot Ag - Ab Kit</option>
+                    <option value="HIV 1/2, Bioline 3.0 Kit (no accessories)">HIV 1/2, Bioline 3.0 Kit (no accessories)</option>
+                    <option value="Sulfadoxine/Pyrimethamine">Sulfadoxine/Pyrimethamine</option>
+                    <option value="Chloroquine base (as phosphate)">Chloroquine base (as phosphate)</option>
+                    <option value="Quinine (as sulfate)">Quinine (as sulfate)</option>
+                    <option value="Indinavir">Indinavir</option>
+                    <option value="Lamivudine/Zidovudine+Nevirapine">Lamivudine/Zidovudine+Nevirapine</option>
+                    <option value="HIV, OraQuick Controls Kit, 3 Vials">HIV, OraQuick Controls Kit, 3 Vials</option>
+                    <option value="Primaquine base (as diphosphate)">Primaquine base (as diphosphate)</option>
+                    <option value="HIV 2, New LAV Blot 2 HIV Kit">HIV 2, New LAV Blot 2 HIV Kit</option>
+                    <option value="HIV, Bioline HIV 1/2 3.0 Kit">HIV, Bioline HIV 1/2 3.0 Kit</option>
+                    <option value="Lamivudine/Zidovudine+Abacavir">Lamivudine/Zidovudine+Abacavir</option>
+                    <option value="Lamivudine/Tenofovir Disoproxil Fumarate">Lamivudine/Tenofovir Disoproxil Fumarate</option>
+                    <option value="HIV, Pepti-LAV 1|2 (HIV-1|2 Ab differenciation, Immuno-Blot)">HIV, Pepti-LAV 1|2 (HIV-1|2 Ab differenciation, Immuno-Blot)</option>
+                    <option value="HIV 1/2, Stat-Pak Dipstick Assay Kit">HIV 1/2, Stat-Pak Dipstick Assay Kit</option>
+                    <option value="Malaria Antigen P.f Kit, 30 x 1 Test">Malaria Antigen P.f Kit, 30 x 1 Test</option>
+                    <option value="Efavirenz/Lamivudine/Tenofovir Disoproxil Fumarate">Efavirenz/Lamivudine/Tenofovir Disoproxil Fumarate</option>
+                    <option value="Etravirine">Etravirine</option>
+                    <option value="HIV 1/2, Bioline 3.0 Diluent, 25 Tests">HIV 1/2, Bioline 3.0 Diluent, 25 Tests</option>
+                    <option value="Atazanavir/Ritonavir">Atazanavir/Ritonavir</option>
+                    <option value="Darunavir">Darunavir</option>
+                    <option value="HIV 1/2, Determine Kit without Lancets, Buffer or Capillary Tubes, 100 Tests">HIV 1/2, Determine Kit without Lancets, Buffer or Capillary Tubes, 100 Tests</option>
+                    <option value="HIV 1/2, OraQuick Rapid Antibody Kit">HIV 1/2, OraQuick Rapid Antibody Kit</option>
+                    <option value="HIV 1/2, Bioline 3.0 Kit">HIV 1/2, Bioline 3.0 Kit</option>
+                    <option value="Raltegravir">Raltegravir</option>
+                    <option value="Atazanavir">Atazanavir</option>
+                    <option value="Chase Buffer, Determine, 100 Tests, 2.5ml x 1 Vial">Chase Buffer, Determine, 100 Tests, 2.5ml x 1 Vial</option>
+                    <option value="Mefloquine (as hydrochloride)">Mefloquine (as hydrochloride)</option>
+                    <option value="Abacavir/Lamivudine">Abacavir/Lamivudine</option>
+                    <option value="HIV 1/2, Genie III Kit">HIV 1/2, Genie III Kit</option>
+                    <option value="HIV 1/2, ImmunoComb II BiSpot EIA Kit">HIV 1/2, ImmunoComb II BiSpot EIA Kit</option>
+                    <option value="HIV 1/2, DoubleCheck Gold Kit">HIV 1/2, DoubleCheck Gold Kit</option>
+                    <option value="HIV, Multispot HIV-1/HIV-2 Rapid Test Kit">HIV, Multispot HIV-1/HIV-2 Rapid Test Kit</option>
+                    <option value="HIV 1/2, Colloidal Gold, Diagnostic Kit Set (includes lancet, transfer pipette & alcohol prep pad)">HIV 1/2, Colloidal Gold, Diagnostic Kit Set (includes lancet, transfer pipette & alcohol prep pad)</option>
+                    <option value="HIV 1/2, Stat-Pak Buffer Only">HIV 1/2, Stat-Pak Buffer Only</option>
+                    <option value="HIV 1/2, INSTI HIV 1/2 Antibody Kit">HIV 1/2, INSTI HIV 1/2 Antibody Kit</option>
+                    <option value="Lamivudine/Zidovudine+Efavirenz">Lamivudine/Zidovudine+Efavirenz</option>
+                    <option value="Malaria, Antigen P.f., HRP2 CareStart Kit">Malaria, Antigen P.f., HRP2 CareStart Kit</option>
+                    <option value="HIV 1/2, HEXAGON Rapid HIV Kit">HIV 1/2, HEXAGON Rapid HIV Kit</option>
+                    <option value="Quinine">Quinine</option>
+                    <option value="Malaria Antigen P.f , HRP2, Kit">Malaria Antigen P.f , HRP2, Kit</option>
+                    <option value="Nelfinavir">Nelfinavir</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Brand</label>
+                <select class="form-control" name="Brand"
+                    required="required">
+                    <option value="Reveal">Reveal</option>
+                    <option value="Generic">Generic</option>
+                    <option value="Determine">Determine</option>
+                    <option value="Stocrin/Sustiva">Stocrin/Sustiva</option>
+                    <option value="Aluvia">Aluvia</option>
+                    <option value="Uni-Gold">Uni-Gold</option>
+                    <option value="InstantCHEK">InstantCHEK</option>
+                    <option value="Videx">Videx</option>
+                    <option value="First Response">First Response</option>
+                    <option value="Stat-Pak">Stat-Pak</option>
+                    <option value="OraQuick">OraQuick</option>
+                    <option value="Bioline">Bioline</option>
+                    <option value="Retrovir">Retrovir</option>
+                    <option value="Viread">Viread</option>
+                    <option value="Zerit">Zerit</option>
+                    <option value="Capillus">Capillus</option>
+                    <option value="Genie">Genie</option>
+                    <option value="Invirase">Invirase</option>
+                    <option value="Videx EC">Videx EC</option>
+                    <option value="Ziagen">Ziagen</option>
+                    <option value="Coartem">Coartem</option>
+                    <option value="Viramune">Viramune</option>
+                    <option value="Paramax">Paramax</option>
+                    <option value="Atripla">Atripla</option>
+                    <option value="Kaletra">Kaletra</option>
+                    <option value="Epivir">Epivir</option>
+                    <option value="Norvir">Norvir</option>
+                    <option value="Truvada">Truvada</option>
+                    <option value="Clearview">Clearview</option>
+                    <option value="Colloidal Gold">Colloidal Gold</option>
+                    <option value="INSTi">INSTi</option>
+                    <option value="Trizivir">Trizivir</option>
+                    <option value="Visitect">Visitect</option>
+                    <option value="Viracept">Viracept</option>
+                    <option value="DoubleCheck">DoubleCheck</option>
+                    <option value="Bundi">Bundi</option>
+                    <option value="ImmunoComb">ImmunoComb</option>
+                    <option value="Crixivan">Crixivan</option>
+                    <option value="LAV">LAV</option>
+                    <option value="Pepti-LAV">Pepti-LAV</option>
+                    <option value="Intelence">Intelence</option>
+                    <option value="Prezista">Prezista</option>
+                    <option value="Isentress">Isentress</option>
+                    <option value="Reyataz">Reyataz</option>
+                    <option value="Combivir">Combivir</option>
+                    <option value="Multispot">Multispot</option>
+                    <option value="CareStart">CareStart</option>
+                    <option value="Hexagon">Hexagon</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Dosage</label>
+                <select class="form-control" name="Dosage"
+                    required="required">
+                    <option value="10mg/ml">10mg/ml</option>
+                    <option value="150mg">150mg</option>
+                    <option value="30mg">30mg</option>
+                    <option value="200mg">200mg</option>
+                    <option value="200/50mg">200/50mg</option>
+                    <option value="150/300mg">150/300mg</option>
+                    <option value="2g">2g</option>
+                    <option value="300mg">300mg</option>
+                    <option value="1mg/ml">1mg/ml</option>
+                    <option value="600mg">600mg</option>
+                    <option value="25mg">25mg</option>
+                    <option value="20mg">20mg</option>
+                    <option value="250mg">250mg</option>
+                    <option value="400mg">400mg</option>
+                    <option value="20/120mg">20/120mg</option>
+                    <option value="50+153mg">50+153mg</option>
+                    <option value="600/200/300mg">600/200/300mg</option>
+                    <option value="100mg">100mg</option>
+                    <option value="80/20mg/ml">80/20mg/ml</option>
+                    <option value="600mg/2ml">600mg/2ml</option>
+                    <option value="150/200/30mg">150/200/30mg</option>
+                    <option value="100/25mg">100/25mg</option>
+                    <option value="50mg">50mg</option>
+                    <option value="15mg">15mg</option>
+                    <option value="300/200mg">300/200mg</option>
+                    <option value="150/300/200mg">150/300/200mg</option>
+                    <option value="133.3/33.3mg">133.3/33.3mg</option>
+                    <option value="80mg/ml">80mg/ml</option>
+                    <option value="30/6mg">30/6mg</option>
+                    <option value="20mg/ml">20mg/ml</option>
+                    <option value="40mg">40mg</option>
+                    <option value="300/150/300mg">300/150/300mg</option>
+                    <option value="500/25mg">500/25mg</option>
+                    <option value="30/50/6mg">30/50/6mg</option>
+                    <option value="150/300+200mg">150/300+200mg</option>
+                    <option value="150/30mg">150/30mg</option>
+                    <option value="150/200/40mg">150/200/40mg</option>
+                    <option value="30mg/ml">30mg/ml</option>
+                    <option value="200/300mg">200/300mg</option>
+                    <option value="150/300+300mg">150/300+300mg</option>
+                    <option value="300/300mg">300/300mg</option>
+                    <option value="60/100/12mg">60/100/12mg</option>
+                    <option value="600/300/300mg">600/300/300mg</option>
+                    <option value="300/100mg">300/100mg</option>
+                    <option value="30/60mg">30/60mg</option>
+                    <option value="60/30mg">60/30mg</option>
+                    <option value="30/50/60mg">30/50/60mg</option>
+                    <option value="500mg">500mg</option>
+                    <option value="125mg">125mg</option>
+                    <option value="600/300mg">600/300mg</option>
+                    <option value="60mg">60mg</option>
+                    <option value="60/12mg">60/12mg</option>
+                    <option value="150/300mg+600mg">150/300mg+600mg</option>
+                    <option value="50mg/g">50mg/g</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Dosage_Form</label>
+                <select class="form-control" name="Dosage_Form"
+                    required="required">
+                    <option value="Test kit">Test kit</option>
+                    <option value="Oral suspension">Oral suspension</option>
+                    <option value="Tablet">Tablet</option>
+                    <option value="Capsule">Capsule</option>
+                    <option value="Oral solution">Oral solution</option>
+                    <option value="Tablet - FDC">Tablet - FDC</option>
+                    <option value="Powder for oral solution">Powder for oral solution</option>
+                    <option value="Test kit - Ancillary">Test kit - Ancillary</option>
+                    <option value="Chewable/dispersible tablet">Chewable/dispersible tablet</option>
+                    <option value="Delayed-release capsules - blister">Delayed-release capsules - blister</option>
+                    <option value="Tablet - blister">Tablet - blister</option>
+                    <option value="Tablet - FDC + blister">Tablet - FDC + blister</option>
+                    <option value="Tablet - FDC + co-blister">Tablet - FDC + co-blister</option>
+                    <option value="Injection">Injection</option>
+                    <option value="Delayed-release capsules">Delayed-release capsules</option>
+                    <option value="Chewable/dispersible tablet - FDC">Chewable/dispersible tablet - FDC</option>
+                    <option value="Oral powder">Oral powder</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Unit_of_Measure_Per_Pack</label>
+                <input class="form-control" type="number" name="Unit_of_Measure_Per_Pack" placeholder="Enter a value of Unit_of_Measure_Per_Pack"
+                    required="required" />
+
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Line_Item_Quantity</label>
+                <input class="form-control" type="number" name="Line_Item_Quantity" placeholder="Enter a value of Line_Item_Quantity"
+                    required="required" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Line_Item_Value</label>
+                <input class="form-control" type="number" step="0.01" name="Line_Item_Value" placeholder="Enter a value of Line_Item_Value"
+                    required="required" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Pack_Price</label>
+                <input class="form-control" type="number" step="0.01" name="Pack_Price" placeholder="Enter a value of Pack_Price"
+                    required="required" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Manufacturing_Site</label>
+                <select class="form-control" name="Manufacturing_Site"
+                    required="required">
+                    <option value="Ranbaxy Fine Chemicals LTD">Ranbaxy Fine Chemicals LTD</option>
+                    <option value="Aurobindo Unit III, India">Aurobindo Unit III, India</option>
+                    <option value="ABBVIE GmbH & Co.KG Wiesbaden">ABBVIE GmbH & Co.KG Wiesbaden</option>
+                    <option value="Ranbaxy, Paonta Shahib, India">Ranbaxy, Paonta Shahib, India</option>
+                    <option value="MSD South Granville Australia">MSD South Granville Australia</option>
+                    <option value="ABBVIE (Abbott) St. P'burg USA">ABBVIE (Abbott) St. P'burg USA</option>
+                    <option value="ABBVIE Ludwigshafen Germany">ABBVIE Ludwigshafen Germany</option>
+                    <option value="Trinity Biotech, Plc">Trinity Biotech, Plc</option>
+                    <option value="EY Laboratories, USA">EY Laboratories, USA</option>
+                    <option value="Cipla, Goa, India">Cipla, Goa, India</option>
+                    <option value="BMS Meymac, France">BMS Meymac, France</option>
+                    <option value="Premier Med. Corp Ltd. India">Premier Med. Corp Ltd. India</option>
+                    <option value="Chembio Diagnostics Sys. Inc.">Chembio Diagnostics Sys. Inc.</option>
+                    <option value="Inverness Japan">Inverness Japan</option>
+                    <option value="Pacific Biotech, Thailand">Pacific Biotech, Thailand</option>
+                    <option value="Standard Diagnostics, Korea">Standard Diagnostics, Korea</option>
+                    <option value="GSK Mississauga (Canada)">GSK Mississauga (Canada)</option>
+                    <option value="Gilead(Nycomed) Oranienburg DE">Gilead(Nycomed) Oranienburg DE</option>
+                    <option value="Bio-Rad Laboratories">Bio-Rad Laboratories</option>
+                    <option value="Mylan (formerly Matrix) Nashik">Mylan (formerly Matrix) Nashik</option>
+                    <option value="Roche Basel">Roche Basel</option>
+                    <option value="GSK Ware (UK)">GSK Ware (UK)</option>
+                    <option value="Novartis Pharma AG, Switzerland">Novartis Pharma AG, Switzerland</option>
+                    <option value="BI, Ingelheim, Germany">BI, Ingelheim, Germany</option>
+                    <option value="Not Applicable">Not Applicable</option>
+                    <option value="Ipca Dadra/Nagar Haveli IN">Ipca Dadra/Nagar Haveli IN</option>
+                    <option value="MSD, Haarlem, NL">MSD, Haarlem, NL</option>
+                    <option value="Aspen-OSD, Port Elizabeth, SA">Aspen-OSD, Port Elizabeth, SA</option>
+                    <option value="ABBVIE (Abbott) Logis. UK">ABBVIE (Abbott) Logis. UK</option>
+                    <option value="Gland Pharma Ltd Pally Factory">Gland Pharma Ltd Pally Factory</option>
+                    <option value="GSK Aranda">GSK Aranda</option>
+                    <option value="Hetero Unit III Hyderabad IN">Hetero Unit III Hyderabad IN</option>
+                    <option value="ABBVIE (Abbott) France">ABBVIE (Abbott) France</option>
+                    <option value="Strides, Bangalore, India.">Strides, Bangalore, India.</option>
+                    <option value="ABBSP">ABBSP</option>
+                    <option value="Cipla, Patalganga, India">Cipla, Patalganga, India</option>
+                    <option value="GSK Cape Town Factory (South Africa)">GSK Cape Town Factory (South Africa)</option>
+                    <option value="MSD Midrand, J'burg, SA">MSD Midrand, J'burg, SA</option>
+                    <option value="KHB Test Kit Facility, Shanghai China">KHB Test Kit Facility, Shanghai China</option>
+                    <option value="bioLytical Laboratories">bioLytical Laboratories</option>
+                    <option value="Inverness USA">Inverness USA</option>
+                    <option value="Boehringer Ing., Koropi, GR">Boehringer Ing., Koropi, GR</option>
+                    <option value="GSK Crawley">GSK Crawley</option>
+                    <option value="OMEGA Diagnostics, UK">OMEGA Diagnostics, UK</option>
+                    <option value="Roche Madrid">Roche Madrid</option>
+                    <option value="BUNDI INTERNATIONAL DIAGNOSTICS LTD">BUNDI INTERNATIONAL DIAGNOSTICS LTD</option>
+                    <option value="INVERNESS ORGENICS LINE">INVERNESS ORGENICS LINE</option>
+                    <option value="Novartis Pharma Suffern, USA">Novartis Pharma Suffern, USA</option>
+                    <option value="Micro Labs Ltd. (Brown & Burk), India">Micro Labs Ltd. (Brown & Burk), India</option>
+                    <option value="Meditab (for Cipla) Daman IN">Meditab (for Cipla) Daman IN</option>
+                    <option value="Medopharm Malur Factory, INDIA">Medopharm Malur Factory, INDIA</option>
+                    <option value="ABBVIE (Abbott) Japan Co. Ltd.">ABBVIE (Abbott) Japan Co. Ltd.</option>
+                    <option value="MSD Elkton USA">MSD Elkton USA</option>
+                    <option value="Orasure Technologies, Inc USA">Orasure Technologies, Inc USA</option>
+                    <option value="Weifa A.S., Hausmanngt. 6, P.O. Box 9113 GrÃ¸nland, 0133, Oslo, Norway">Weifa A.S., Hausmanngt. 6, P.O. Box 9113 GrÃ¸nland, 0133, Oslo, Norway</option>
+                    <option value="MSD Manati, Puerto Rico, (USA)">MSD Manati, Puerto Rico, (USA)</option>
+                    <option value="MSD Patheon, Canada">MSD Patheon, Canada</option>
+                    <option value="Emcure Plot No.P-2, I.T-B.T. Park, Phase II, MIDC, Hinjwadi, Pune, India">Emcure Plot No.P-2, I.T-B.T. Park, Phase II, MIDC, Hinjwadi, Pune, India</option>
+                    <option value="Alere Medical Co., Ltd.">Alere Medical Co., Ltd.</option>
+                    <option value="Premier Medical Corporation">Premier Medical Corporation</option>
+                    <option value="ABBVIE Labs North Chicago US">ABBVIE Labs North Chicago US</option>
+                    <option value="Janssen-Cilag, Latina, IT">Janssen-Cilag, Latina, IT</option>
+                    <option value="Aurobindo Unit VII, IN">Aurobindo Unit VII, IN</option>
+                    <option value="Micro labs, Verna, Goa, India">Micro labs, Verna, Goa, India</option>
+                    <option value="Orasure Technologies, Inc">Orasure Technologies, Inc</option>
+                    <option value="Mylan,  H-12 & H-13, India">Mylan,  H-12 & H-13, India</option>
+                    <option value="Hetero, Jadcherla, unit 5, IN">Hetero, Jadcherla, unit 5, IN</option>
+                    <option value="Bristol-Myers Squibb Anagni IT">Bristol-Myers Squibb Anagni IT</option>
+                    <option value="Cipla Ltd A-42 MIDC Mahar. IN">Cipla Ltd A-42 MIDC Mahar. IN</option>
+                    <option value="Medochemie Factory A, CY">Medochemie Factory A, CY</option>
+                    <option value="Boehringer Ingelheim Roxane US">Boehringer Ingelheim Roxane US</option>
+                    <option value="BMS Evansville, US">BMS Evansville, US</option>
+                    <option value="GSK, U1, Poznan, Poland">GSK, U1, Poznan, Poland</option>
+                    <option value="Janssen Ortho LLC, Puerto Rico">Janssen Ortho LLC, Puerto Rico</option>
+                    <option value="Micro Labs, Hosur, India">Micro Labs, Hosur, India</option>
+                    <option value="Remedica, Limassol, Cyprus">Remedica, Limassol, Cyprus</option>
+                    <option value="INVERNESS ANY">INVERNESS ANY</option>
+                    <option value="Guilin OSD site, No 17, China">Guilin OSD site, No 17, China</option>
+                    <option value="Cipla, Kurkumbh, India">Cipla, Kurkumbh, India</option>
+                    <option value="GSK Barnard Castle UK">GSK Barnard Castle UK</option>
+                    <option value="Gland Pharma, Hyderabad, IN">Gland Pharma, Hyderabad, IN</option>
+                    <option value="Access BIO, L.C.">Access BIO, L.C.</option>
+                    <option value="Human Diagnostic">Human Diagnostic</option>
+                    <option value="Mepro Pharm Wadhwan Unit II">Mepro Pharm Wadhwan Unit II</option>
+                    <option value="Ranbaxy per Shasun Pharma Ltd">Ranbaxy per Shasun Pharma Ltd</option>
+                    <option value="MedMira Inc.">MedMira Inc.</option>
+                    <option value="Ranbaxy per Shasun Pharma">Ranbaxy per Shasun Pharma</option>
+                    <option value="Macleods Daman Plant INDIA">Macleods Daman Plant INDIA</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">First_Line_Designation</label>
+                <select class="form-control" name="First_Line_Designation"
+                    required="required">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Line_Item_Insurance_USD</label>
+                <input class="form-control" type="number" step="0.01" name="Line_Item_Insurance_USD" placeholder="Enter a value of Line_Item_Insurance_USD"
+                    required="required" />
+            </div>
+            <div class="mb-3">
+                <input class="btn btn-primary" type="submit" value="Predict Shipment Price" required />
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-6 col-sm-12 col-xs-6 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+              Shipment Price value
+            </div>
+            <div class="card-body">
+        {% if context['shipment_data'] is not none %}
+        <table class="table table-striped">
+            <caption>Predict Shipment Price </caption>
+            <tr>
+                <th>Input Feature</th>
+                <th>Feature Value</th>
+
+            </tr>
+            {% for column,value in context['shipment_data'].items() %}
+
+
+
+            <tr>
+                <td>{{column}}</td>
+                <td>{{value[0]}}</td>
+            </tr>
+
+            {% endfor %}
+            <tr>
+
+                <td>Shipment Price Value</td>
+                <td>
+                    {{ context['shipment_price_value'] }}
+                </td>
+            </tr>
+        </table>
+
+        {% else %}
+
+              <h5 class="card-title text-black">Submit Form</h5>
+              <p class="card-text text-black">Kindly provide necessary information to estimate shipment price</p>
+
+
+
+        {% endif %}
+        <font style="color: black;">Go to </font><a href="/" class="btn btn-primary">Home</a>
+    </div>
+</div>
+    </div>
+
+    {% endblock %}
+</div>
