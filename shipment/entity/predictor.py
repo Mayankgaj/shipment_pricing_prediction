@@ -1,15 +1,62 @@
 import os
 import sys
-
+from shipment.entity.artifact_entity import DataIngestionArtifact
 from shipment.exception import ShipmentException
 from shipment.utils.util import load_object
 
 import pandas as pd
 
 
+def transform(X: pd.DataFrame):
+    try:
+        df: pd.DataFrame = X.copy()
+
+        columns_remove = ['ID', 'PQ First Sent to Client Date', 'PO Sent to Vendor Date', 'Weight (Kilograms)',
+                          'Freight Cost (USD)', 'PQ #', 'PO / SO #', 'ASN/DN #']
+        for i in columns_remove:
+            if i in df:
+                df.drop(i, axis=1, inplace=True)
+
+        for column in ['Scheduled Delivery Date', 'Delivered to Client Date', 'Delivery Recorded Date']:
+            if column in df:
+                df[column] = pd.to_datetime(df[column])
+                df[column + ' Year'] = df[column].apply(lambda x: x.year)
+                df[column + ' Month'] = df[column].apply(lambda x: x.month)
+                df[column + ' Day'] = df[column].apply(lambda x: x.day)
+                df = df.drop(column, axis=1)
+
+        binary_columns = ['Fulfill Via', 'First Line Designation']
+        for i in binary_columns:
+            if i in df:
+                df['Fulfill Via'] = df['Fulfill Via'].replace({'Direct Drop': 0, 'From RDC': 1})
+                df['First Line Designation'] = df['First Line Designation'].replace({'No': 0, 'Yes': 1})
+
+        # Fill missing values
+        df['Shipment Mode'] = df['Shipment Mode'].fillna(df['Shipment Mode'].mode()[0])
+        df['Dosage'] = df['Dosage'].fillna(df['Dosage'].mode()[0])
+        df['Line Item Insurance (USD)'] = df['Line Item Insurance (USD)'].fillna(
+            df['Line Item Insurance (USD)'].mean())
+
+        object_type = ['Country', 'Managed By', 'Vendor INCO Term',
+                       'Shipment Mode', 'Product Group', 'Sub Classification', 'Vendor',
+                       'Item Description', 'Molecule/Test Type', 'Brand', 'Dosage',
+                       'Dosage Form', 'Manufacturing Site', 'Project Code']
+        # One-hot encoding
+        for column in object_type:
+            dummies = pd.get_dummies(df[column], prefix=column)
+            df = pd.concat([df, dummies], axis=1)
+            df = df.drop(column, axis=1)
+
+        df = df.iloc[-1].to_frame()
+        return df.T
+    except Exception as e:
+        raise ShipmentException(e, sys)
+
+
 class ShipmentData:
 
     def __init__(self,
+                 data_ingestion_artifact: DataIngestionArtifact,
                  country: str,
                  Managed_By: str,
                  Fulfill_Via: str,
@@ -36,6 +83,7 @@ class ShipmentData:
                  Line_Item_Insurance_USD: float
                  ):
         try:
+            self.data_ingestion_artifact = data_ingestion_artifact,
             self.country = country,
             self.Managed_By = Managed_By,
             self.Fulfill_Via = Fulfill_Via,
@@ -91,7 +139,14 @@ class ShipmentData:
                 "First_Line_Designation": [self.First_Line_Designation],
                 "Line_Item_Insurance_USD": [self.Line_Item_Insurance_USD]}
 
-            return pd.DataFrame(input_data)
+            train = self.data_ingestion_artifact.train_file_path
+            test = self.data_ingestion_artifact.test_file_path
+            train_df = pd.read_csv(train)
+            test_df = pd.read_csv(test)
+            input_df = pd.read_csv(input_data)
+            df = pd.concat(objs=[train_df, test_df, input_df], axis=0)
+            tran_df = transform(df)
+            return tran_df
         except Exception as e:
             raise ShipmentException(e, sys) from e
 
@@ -114,20 +169,11 @@ class ShipmentPredictor:
         except Exception as e:
             raise ShipmentException(e, sys) from e
 
-    def predict_t1(self, X):
+    def predict(self, X):
         try:
             model_path = self.get_latest_model_path(0)
             model = load_object(file_path=model_path)
             shipment_pack_price = model.predict(X)
             return shipment_pack_price
-        except Exception as e:
-            raise ShipmentException(e, sys) from e
-
-    def predict_t2(self, X):
-        try:
-            model_path = self.get_latest_model_path(1)
-            model = load_object(file_path=model_path)
-            shipment_unit_price = model.predict(X)
-            return shipment_unit_price
         except Exception as e:
             raise ShipmentException(e, sys) from e
