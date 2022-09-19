@@ -19,8 +19,8 @@ LOG_DIR = os.path.join(ROOT_DIR, LOG_FOLDER_NAME)
 PIPELINE_DIR = os.path.join(ROOT_DIR, PIPELINE_FOLDER_NAME)
 MODEL_DIR = os.path.join(ROOT_DIR, SAVED_MODELS_DIR_NAME)
 
-CONCRETE_DATA_KEY = "shipment_data"
-CONCRETE_STRENGTH_VALUE_KEY = "shipment_strength_value"
+SHIPMENT_DATA_KEY = "shipment_data"
+SHIPMENT_STRENGTH_VALUE_KEY = "shipment_price_value"
 
 app = Flask(__name__)
 
@@ -94,66 +94,54 @@ def train():
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
     context = {
-        CONCRETE_DATA_KEY: None,
-        CONCRETE_STRENGTH_VALUE_KEY: None
+        SHIPMENT_DATA_KEY: None,
+        SHIPMENT_STRENGTH_VALUE_KEY: None
     }
 
     if request.method == 'POST':
-        country = str(request.form['country'])
-        Managed_By = str(request.form['Managed_By'])
-        Fulfill_Via = str(request.form['Fulfill_Via'])
-        Vendor_INCO_Term = str(request.form['Vendor_INCO_Term'])
-        Shipment_Mode = str(request.form['Shipment_Mode'])
-        Scheduled_Delivery_Date = str(request.form['Scheduled_Delivery_Date'])
-        Delivered_to_Client_Date = str(request.form['Delivered_to_Client_Date'])
-        Delivery_Recorded_Date = str(request.form['Delivery_Recorded_Date'])
-        Product_Group = str(request.form['Product_Group'])
-        Sub_Classification = str(request.form['Sub_Classification'])
-        Vendor = str(request.form['Vendor'])
-        Item_Description = str(request.form['Item_Description'])
-        Molecule_Test_Type = str(request.form['Molecule_Test_Type'])
-        Brand = str(request.form['Brand'])
-        Dosage = str(request.form['Dosage'])
-        Dosage_Form = str(request.form['Dosage_Form'])
+        country = request.form['country']
+        Managed_By = request.form['Managed_By']
+        Fulfill_Via = request.form['Fulfill_Via']
+        Vendor_INCO_Term = request.form['Vendor_INCO_Term']
+        Shipment_Mode = request.form['Shipment_Mode']
+        Scheduled_Delivery_Date = request.form['Scheduled_Delivery_Date']
+        Delivered_to_Client_Date = request.form['Delivered_to_Client_Date']
+        Delivery_Recorded_Date = request.form['Delivery_Recorded_Date']
+        Product_Group = request.form['Product_Group']
+        Sub_Classification = request.form['Sub_Classification']
+        Vendor = request.form['Vendor']
+        Item_Description = request.form['Item_Description']
+        Molecule_Test_Type = request.form['Molecule_Test_Type']
+        Brand = request.form['Brand']
+        Dosage = request.form['Dosage']
+        Dosage_Form = request.form['Dosage_Form']
         Unit_of_Measure_Per_Pack = int(request.form['Unit_of_Measure_Per_Pack'])
         Line_Item_Quantity = int(request.form['Line_Item_Quantity'])
         Line_Item_Value = float(request.form['Line_Item_Value'])
         Pack_Price = float(request.form['Pack_Price'])
-        Manufacturing_Site = str(request.form['Manufacturing_Site'])
-        First_Line_Designation = str(request.form['First_Line_Designation'])
+        Manufacturing_Site = request.form['Manufacturing_Site']
+        First_Line_Designation = request.form['First_Line_Designation']
         Line_Item_Insurance_USD = float(request.form['Line_Item_Insurance_USD'])
 
-        shipment_data = ShipmentData(
-            country=country,
-            Managed_By=Managed_By,
-            Fulfill_Via=Fulfill_Via,
-            Vendor_INCO_Term=Vendor_INCO_Term,
-            Shipment_Mode=Shipment_Mode,
-            Scheduled_Delivery_Date=Scheduled_Delivery_Date,
-            Delivered_to_Client_Date=Delivered_to_Client_Date,
-            Delivery_Recorded_Date=Delivery_Recorded_Date,
-            Product_Group=Product_Group,
-            Sub_Classification=Sub_Classification,
-            Vendor=Vendor,
-            Item_Description=Item_Description,
-            Molecule_Test_Type=Molecule_Test_Type,
-            Brand=Brand,
-            Dosage=Dosage,
-            Dosage_Form=Dosage_Form,
-            Unit_of_Measure_Per_Pack=Unit_of_Measure_Per_Pack,
-            Line_Item_Quantity=Line_Item_Quantity,
-            Line_Item_Value=Line_Item_Value,
-            Pack_Price=Pack_Price,
-            Manufacturing_Site=Manufacturing_Site,
-            First_Line_Designation=First_Line_Designation,
-            Line_Item_Insurance_USD=Line_Item_Insurance_USD
-        )
+        shipment_data = ShipmentData(country=country, Managed_By=Managed_By, Fulfill_Via=Fulfill_Via,
+                                     Vendor_INCO_Term=Vendor_INCO_Term, Shipment_Mode=Shipment_Mode,
+                                     Scheduled_Delivery_Date=Scheduled_Delivery_Date,
+                                     Delivered_to_Client_Date=Delivered_to_Client_Date,
+                                     Delivery_Recorded_Date=Delivery_Recorded_Date, Product_Group=Product_Group,
+                                     Sub_Classification=Sub_Classification, Vendor=Vendor,
+                                     Item_Description=Item_Description, Molecule_Test_Type=Molecule_Test_Type,
+                                     Brand=Brand, Dosage=Dosage, Dosage_Form=Dosage_Form,
+                                     Unit_of_Measure_Per_Pack=Unit_of_Measure_Per_Pack,
+                                     Line_Item_Quantity=Line_Item_Quantity, Line_Item_Value=Line_Item_Value,
+                                     Pack_Price=Pack_Price, Manufacturing_Site=Manufacturing_Site,
+                                     First_Line_Designation=First_Line_Designation,
+                                     Line_Item_Insurance_USD=Line_Item_Insurance_USD)
         shipment_df = shipment_data.get_shipment_input_data_frame()
         shipment_predictor = ShipmentPredictor(model_dir=MODEL_DIR)
         median_shipment_value = shipment_predictor.predict(X=shipment_df)
         context = {
-            CONCRETE_DATA_KEY: shipment_data.get_shipment_input_data_frame(),
-            CONCRETE_STRENGTH_VALUE_KEY: median_shipment_value,
+            SHIPMENT_DATA_KEY: shipment_data.data(),
+            SHIPMENT_STRENGTH_VALUE_KEY: median_shipment_value[0],
         }
         return render_template('predict.html', context=context)
     return render_template("predict.html", context=context)
@@ -235,4 +223,4 @@ def render_log_dir(req_path):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True, port=5000)

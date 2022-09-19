@@ -1,56 +1,10 @@
-import os
-import sys
-from shipment.constant import ROOT_DIR
+import os, sys
+import numpy as np
+from shipment.entity.prediction_data import call_empty
 from shipment.exception import ShipmentException
 from shipment.utils.util import load_object
 
 import pandas as pd
-
-
-def transform(X: pd.DataFrame):
-    try:
-        df: pd.DataFrame = X.copy()
-
-        columns_remove = ['ID', 'PQ First Sent to Client Date', 'PO Sent to Vendor Date', 'Weight (Kilograms)',
-                          'Freight Cost (USD)', 'PQ #', 'PO / SO #', 'ASN/DN #']
-        for i in columns_remove:
-            if i in df:
-                df.drop(i, axis=1, inplace=True)
-
-        for column in ['Scheduled Delivery Date', 'Delivered to Client Date', 'Delivery Recorded Date']:
-            if column in df:
-                df[column] = pd.to_datetime(df[column])
-                df[column + ' Year'] = df[column].apply(lambda x: x.year)
-                df[column + ' Month'] = df[column].apply(lambda x: x.month)
-                df[column + ' Day'] = df[column].apply(lambda x: x.day)
-                df = df.drop(column, axis=1)
-
-        binary_columns = ['Fulfill Via', 'First Line Designation']
-        for i in binary_columns:
-            if i in df:
-                df['Fulfill Via'] = df['Fulfill Via'].replace({'Direct Drop': 0, 'From RDC': 1})
-                df['First Line Designation'] = df['First Line Designation'].replace({'No': 0, 'Yes': 1})
-
-        # Fill missing values
-        df['Shipment Mode'] = df['Shipment Mode'].fillna(df['Shipment Mode'].mode()[0])
-        df['Dosage'] = df['Dosage'].fillna(df['Dosage'].mode()[0])
-        df['Line Item Insurance (USD)'] = df['Line Item Insurance (USD)'].fillna(
-            df['Line Item Insurance (USD)'].mean())
-
-        object_type = ['Country', 'Managed By', 'Vendor INCO Term',
-                       'Shipment Mode', 'Product Group', 'Sub Classification', 'Vendor',
-                       'Item Description', 'Molecule/Test Type', 'Brand', 'Dosage',
-                       'Dosage Form', 'Manufacturing Site', 'Project Code']
-        # One-hot encoding
-        for column in object_type:
-            dummies = pd.get_dummies(df[column], prefix=column)
-            df = pd.concat([df, dummies], axis=1)
-            df = df.drop(column, axis=1)
-
-        df = df.iloc[-1].to_frame()
-        return df.T
-    except Exception as e:
-        raise ShipmentException(e, sys)
 
 
 class ShipmentData:
@@ -110,38 +64,89 @@ class ShipmentData:
     def get_shipment_input_data_frame(self):
         try:
             input_data = {
-                "country": [self.country],
-                "Managed By": [self.Managed_By],
-                "Fulfill Via": [self.Fulfill_Via],
-                "Vendor INCO Term": [self.Vendor_INCO_Term],
-                "Shipment Mode": [self.Shipment_Mode],
-                "Scheduled Delivery Date": [self.Scheduled_Delivery_Date],
-                "Delivered to Client Date": [self.Delivered_to_Client_Date],
-                "Delivery Recorded Date": [self.Delivery_Recorded_Date],
-                "Product Group": [self.Product_Group],
-                "Sub Classification": [self.Sub_Classification],
-                "Vendor": [self.Vendor],
-                "Item Description": [self.Item_Description],
-                "Molecule/Test Type": [self.Molecule_Test_Type],
-                "Brand": [self.Brand],
-                "Dosage": [self.Dosage],
-                "Dosage Form": [self.Dosage_Form],
-                "Unit of Measure (Per Pack)": [self.Unit_of_Measure_Per_Pack],
-                "Line Item Quantity": [self.Line_Item_Quantity],
-                "Line Item Value": [self.Line_Item_Value],
-                "Pack Price": [self.Pack_Price],
-                "Manufacturing Site": [self.Manufacturing_Site],
-                "First Line Designation": [self.First_Line_Designation],
-                "Line Item Insurance (USD)": [self.Line_Item_Insurance_USD]}
+                "Country": list(self.country),
+                "Managed By": list(self.Managed_By),
+                "Fulfill Via": list(self.Fulfill_Via),
+                "Vendor INCO Term": list(self.Vendor_INCO_Term),
+                "Shipment Mode": list(self.Shipment_Mode),
+                "Scheduled Delivery Date": list(self.Scheduled_Delivery_Date),
+                "Delivered to Client Date": list(self.Delivered_to_Client_Date),
+                "Delivery Recorded Date": list(self.Delivery_Recorded_Date),
+                "Product Group": list(self.Product_Group),
+                "Sub Classification": list(self.Sub_Classification),
+                "Vendor": list(self.Vendor),
+                "Item Description": list(self.Item_Description),
+                "Molecule/Test Type": list(self.Molecule_Test_Type),
+                "Brand": list(self.Brand),
+                "Dosage": list(self.Dosage),
+                "Dosage Form": list(self.Dosage_Form),
+                "Unit of Measure (Per Pack)": list(self.Unit_of_Measure_Per_Pack),
+                "Line Item Quantity": list(self.Line_Item_Quantity),
+                "Line Item Value": list(self.Line_Item_Value),
+                "Pack Price": list(self.Pack_Price),
+                "Manufacturing Site": list(self.Manufacturing_Site),
+                "First Line Designation": list(self.First_Line_Designation),
+                "Line Item Insurance (USD)": float(self.Line_Item_Insurance_USD)}
 
-            train = os.path.join(ROOT_DIR, "SCMS_Delivery_History_Dataset.csv")
-            train_df = pd.read_csv(train).drop("Unit Price", axis=1)
-            input_df = pd.read_csv(input_data)
-            df = pd.concat(objs=[train_df, input_df], axis=0)
-            tran_df = transform(df)
-            return tran_df
+            input_df = pd.DataFrame.from_dict(input_data)
+            input_df.to_csv("input_raw.csv")
+            date_col = ["Scheduled Delivery Date", "Delivered to Client Date",
+                        "Delivery Recorded Date"]
+            empty_data = call_empty()
+            input_df['Fulfill Via'] = input_df['Fulfill Via'].replace({'Direct Drop': 0, 'From RDC': 1})
+            input_df['First Line Designation'] = input_df['First Line Designation'].replace({'No': 0, 'Yes': 1})
+            for column in date_col:
+                my_date = pd.to_datetime(input_df[column][0])
+                empty_data[column + " Year"] = my_date.year
+                empty_data[column + " Month"] = my_date.month
+                empty_data[column + " Day"] = my_date.day
+                input_df.drop(column, axis=1, inplace=True)
+
+            col = ['Country', 'Managed By', 'Fulfill Via', 'Vendor INCO Term', 'Shipment Mode', 'Product Group',
+                   'Sub Classification', 'Vendor', 'Item Description', 'Molecule/Test Type', 'Brand', 'Dosage',
+                   'Dosage Form', 'Unit of Measure (Per Pack)', 'Line Item Quantity', 'Line Item Value', 'Pack Price',
+                   'Manufacturing Site', 'First Line Designation', 'Line Item Insurance (USD)']
+            for i in col:
+                if type(input_df[i][0]) == (np.int64 or np.float64):
+                    empty_data[i] = input_df[i][0]
+                elif type(input_df[i][0]) == str:
+                    empty_data[i + "_" + str(input_df[i][0])] = 1
+
+            empty_data["Pack Price"] = input_df["Pack Price"][0]
+            tran_input = pd.DataFrame.from_dict(empty_data, orient='index').T
+            tran_input["t"] = 0
+            tran_input["s"] = 0
+            return np.array(tran_input)
         except Exception as e:
             raise ShipmentException(e, sys) from e
+
+    def data(self):
+        input_data = {
+            "Country": list(self.country),
+            "Managed By": list(self.Managed_By),
+            "Fulfill Via": list(self.Fulfill_Via),
+            "Vendor INCO Term": list(self.Vendor_INCO_Term),
+            "Shipment Mode": list(self.Shipment_Mode),
+            "Scheduled Delivery Date": list(self.Scheduled_Delivery_Date),
+            "Delivered to Client Date": list(self.Delivered_to_Client_Date),
+            "Delivery Recorded Date": list(self.Delivery_Recorded_Date),
+            "Product Group": list(self.Product_Group),
+            "Sub Classification": list(self.Sub_Classification),
+            "Vendor": list(self.Vendor),
+            "Item Description": list(self.Item_Description),
+            "Molecule/Test Type": list(self.Molecule_Test_Type),
+            "Brand": list(self.Brand),
+            "Dosage": list(self.Dosage),
+            "Dosage Form": list(self.Dosage_Form),
+            "Unit of Measure (Per Pack)": list(self.Unit_of_Measure_Per_Pack),
+            "Line Item Quantity": list(self.Line_Item_Quantity),
+            "Line Item Value": list(self.Line_Item_Value),
+            "Pack Price": list(self.Pack_Price),
+            "Manufacturing Site": list(self.Manufacturing_Site),
+            "First Line Designation": list(self.First_Line_Designation),
+            "Line Item Insurance (USD)": float(self.Line_Item_Insurance_USD)}
+
+        return pd.DataFrame(input_data)
 
 
 class ShipmentPredictor:

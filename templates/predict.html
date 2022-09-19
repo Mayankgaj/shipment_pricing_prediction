@@ -23,9 +23,8 @@
             <legend>Shipment Price Form</legend>
             <div class="mb-3">
                 <label class="form-label">country</label>
-                <select class="form-control" name="Country" placeholder="Enter Country Name"
+                <select class="form-control" name="country" placeholder="Enter Country Name"
                     required="required">
-                    <option value="Côte d'Ivoire">Côte d'Ivoire</option>
                     <option value="Vietnam">Vietnam</option>
                     <option value="Nigeria">Nigeria</option>
                     <option value="Zambia">Zambia</option>
@@ -769,7 +768,7 @@
             </div>
             <div class="card-body">
         {% if context['shipment_data'] is not none %}
-        <table class="table table-striped">
+        <table class="table table-striped" style="text:normal, colour: black">
             <caption>Predict Shipment Price </caption>
             <tr>
                 <th>Input Feature</th>
