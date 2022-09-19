@@ -141,7 +141,7 @@ def predict():
         median_shipment_value = shipment_predictor.predict(X=shipment_df)
         context = {
             SHIPMENT_DATA_KEY: shipment_data.data(),
-            SHIPMENT_STRENGTH_VALUE_KEY: median_shipment_value[0],
+            SHIPMENT_STRENGTH_VALUE_KEY: abs(median_shipment_value[0]),
         }
         return render_template('predict.html', context=context)
     return render_template("predict.html", context=context)
